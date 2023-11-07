@@ -2,6 +2,7 @@
  SSL Cert Import
 **************
 Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
+Get-ChildItem Cert:\CurrentUser\My | Format-Table Subject, FriendlyName, Thumbprint -AutoSize
 
 
 IIS:
