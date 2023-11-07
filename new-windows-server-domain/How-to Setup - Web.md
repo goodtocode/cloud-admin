@@ -55,7 +55,7 @@ View sites and app pools
 **************
 # Test default site
 Test-NetConnection -ComputerName localhost -Port 80
-Invoke-WebRequest -Uri "http://localhost" -UseBasicParsing
+Invoke-WebRequest -Uri "http://localhost" -UseBasicParsing | select-object -expand content 
 Invoke-WebRequest -Uri "http://IP_ADDRESS" -UseBasicParsing
 # Get IIS Info
 Get-IISAppPool

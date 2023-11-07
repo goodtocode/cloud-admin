@@ -1,6 +1,8 @@
-Godaddy Code:
-?   - bb1026a
-25% - gdbb1005a
+**************
+ SSL Cert Import
+**************
+Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
+
 
 IIS:
 1. Generate from IIS (ServerName->Server Certificates->Create Certificate Request)
