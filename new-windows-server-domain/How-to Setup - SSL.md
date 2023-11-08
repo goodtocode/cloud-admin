@@ -1,11 +1,23 @@
+*************
+App compatibility
+*************
+Get-WindowsCapability -Online | Where-Object {$_.State -eq 'Staged'}
+Add-WindowsCapability -Online -Name ServerCore.AppCompatibility~~~~0.0.1.0
+
 **************
  SSL Cert Import
 **************
 Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
+# Verify
 Get-ChildItem Cert:\CurrentUser\My | Format-Table Subject, FriendlyName, Thumbprint -AutoSize
+Set-Location Cert:\CurrentUser\My
+Get-ChildItem | Format-Table Subject, Thumbprint -AutoSize
 
-
+***********
 IIS:
+***********
+Install-WindowsFeature -Name Web-Mgmt-Console
+
 1. Generate from IIS (ServerName->Server Certificates->Create Certificate Request)
 * Common Name - www.domain.com
 * Organization - The legally registered name of your organization/company. 
@@ -21,7 +33,12 @@ IIS:
 * Select a credential store (Personal or Web Hosting): Personal
 6 Now shows up in server certificate list
 
+**********
 MMC:
+**********
+Get-WindowsCapability -Online -Name RSAT*
+Add-WindowsCapability -Online -Name RSAT.MMC.Tools~~~~0.0.1.0
+
 MMC -> Add/Remove Snapin -> Certificates
 Personal -> Advanced -> Create Request
 1. Proceed without enrollment policy. 
