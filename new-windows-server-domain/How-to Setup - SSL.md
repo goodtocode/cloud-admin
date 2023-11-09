@@ -7,10 +7,10 @@ Add-WindowsCapability -Online -Name ServerCore.AppCompatibility~~~~0.0.1.0
 **************
  SSL Cert Import
 **************
-Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\CurrentUser\My
+Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\LocalMachine\My
 # Verify
-Get-ChildItem Cert:\CurrentUser\My | Format-Table Subject, FriendlyName, Thumbprint -AutoSize
-Set-Location Cert:\CurrentUser\My
+Get-ChildItem Cert:\LocalMachine\My | Format-Table Subject, FriendlyName, Thumbprint -AutoSize
+Set-Location Cert:\LocalMachine\My
 Get-ChildItem | Format-Table Subject, Thumbprint -AutoSize
 
 ***********
