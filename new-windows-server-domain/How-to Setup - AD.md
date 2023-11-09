@@ -59,6 +59,12 @@ New-ADUSer -Name "Robert J. Good" -GivenName "Robert" -Surname "Good" -SAMAccoun
  -AccountPassword (Read-Host -AsSecureString "ENTER_PASSWORD_HERE") -PassThru | Enable-ADAccount; '
 Add-ADGroupMember -Identity "Domain Admins" -Members rjgood;
 
+
+*************
+Add local user to VM
+*************
+Add-LocalGroupMember -Group "Administrators" -Member "Contoso\IT"
+
 **************
  Create gMSA User (Group Managed Service Account)
 **************

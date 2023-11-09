@@ -195,6 +195,11 @@ $Password = 'PASSWORD_HERE'; `
 Set-ItemProperty "IIS:\AppPools\$Site" -name processModel -value @{userName="$User";password="$Password";identitytype=3};
 
 **************
+(Optional) Web Site Host Header binding - Remove
+**************
+Remove-IISSiteBinding -Name "dev.goodtocode.com" -BindingInformation "*:30001:" -Protocol "http"
+
+**************
 (Optional) Web Site Host Header binding
 **************
 > Get-WebSite
