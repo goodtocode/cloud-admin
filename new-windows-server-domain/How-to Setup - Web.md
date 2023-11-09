@@ -25,6 +25,10 @@ Get-Service | Select-Object Name, Status, StartType
 Start-Service -Name "WMSVC"
 Set-Service -Name "WMSVC" -StartupType Automatic
 
+# Add Anonymous authentication
+Get-WebConfigurationProperty -Filter "/system.webServer/security/authentication/anonymousAuthentication" -Name "value" -PSPath 'IIS:\Sites\YourWebsiteName' | Select-Object value
+Set-WebConfigurationProperty -Filter '/system.webServer/security/authentication/anonymousAuthentication' -Name 'enabled' -Value $true -PSPath 'IIS:\Sites\YourWebsiteName'
+iisreset
 
 **************
 Disable Firewall
@@ -60,7 +64,9 @@ Invoke-WebRequest -Uri "http://IP_ADDRESS" -UseBasicParsing
 # Get IIS Info
 Get-IISAppPool
 Get-Website
+Get-WebApplication
 Get-WebBinding
+Get-WebVirtualDirectory -Site "Default Web Site" -Application "TestApp"
 # Remove default site
 Remove-IISSite -Name "MyWebsite"
 Remove-WebAppPool -Name "MyAppPool"
