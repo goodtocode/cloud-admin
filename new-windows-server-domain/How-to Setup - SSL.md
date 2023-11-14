@@ -5,6 +5,14 @@ Get-WindowsCapability -Online | Where-Object {$_.State -eq 'Staged'}
 Add-WindowsCapability -Online -Name ServerCore.AppCompatibility~~~~0.0.1.0
 
 **************
+Generate self-signed cert
+**************
+# generate cert
+dotnet dev-certs https
+# trust cert
+dotnet dev-certs https --trust
+
+**************
  SSL Cert Import
 **************
 Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\LocalMachine\My
