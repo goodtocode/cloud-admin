@@ -13,10 +13,23 @@ Get-ChildItem Cert:\LocalMachine\My | Format-Table Subject, FriendlyName, Thumbp
 Set-Location Cert:\LocalMachine\My
 Get-ChildItem | Format-Table Subject, Thumbprint -AutoSize
 
+
+**************
+Ensure Invoke-WebRequest uses TLS 1.2
+**************
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+**************
+ SSL Cert removing duplicate hash binding
+**************
+netsh http show sslcert > c:\temp\result.txt
+netsh http delete sslcert ipport=0.0.0.0:443
+
 ***********
-IIS:
+IIS: Management console and SSL
 ***********
 Install-WindowsFeature -Name Web-Mgmt-Console
+c:\windows\system32\inetsrv\inetmgr.exe
 
 1. Generate from IIS (ServerName->Server Certificates->Create Certificate Request)
 * Common Name - www.domain.com

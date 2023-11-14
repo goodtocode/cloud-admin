@@ -3,10 +3,11 @@ Install-WindowsFeature
 **************
 > Install-WindowsFeature Web-Server
 
-**************
-Install IIS Manager (tool)
-**************
-> Server manager -> Roles and Features -> Web Server (IIS) -> De-select Web Server, leave MMC checked.
+***********
+IIS: Management console
+***********
+Install-WindowsFeature -Name Web-Mgmt-Console
+c:\windows\system32\inetsrv\inetmgr.exe
 
 **************
 Remove WebDAV Publishing - it blocks PUT and DELETE
@@ -26,8 +27,17 @@ Start-Service -Name "WMSVC"
 Set-Service -Name "WMSVC" -StartupType Automatic
 
 # Add Anonymous authentication
+Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/security/authentication/anonymousAuthentication' -Name 'enabled' -Value 'True'
+Restart-Service -Name 'W3SVC'
+# Get anonymous authentication value for website
 Get-WebConfigurationProperty -Filter "/system.webServer/security/authentication/anonymousAuthentication" -Name "value" -PSPath 'IIS:\Sites\YourWebsiteName' | Select-Object value
+# Set For website
 Set-WebConfigurationProperty -Filter '/system.webServer/security/authentication/anonymousAuthentication' -Name 'enabled' -Value $true -PSPath 'IIS:\Sites\YourWebsiteName'
+Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST/YourWebsiteName' -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "True"
+# Set For subfolder
+Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST/YourWebsiteName' -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "True" -Location "Subfolder"
+
+
 iisreset
 
 **************
@@ -72,6 +82,23 @@ Remove-IISSite -Name "MyWebsite"
 Remove-WebAppPool -Name "MyAppPool"
 
 
+**************
+Start sites and app pools
+**************
+# Using Start-IISSite
+Start-IISSite -Name "Default Web Site"
+# Using Start-Website
+Start-Website -Name "Default Web Site"
+
+**************
+Environment variables
+**************
+# Set ASPNETCORE_ENVIRONMENT
+setx ASPNETCORE_ENVIRONMENT Development /M
+$Env:ASPNETCORE_ENVIRONMENT = "Development"
+Set-Item -Path Env:ASPNETCORE_ENVIRONMENT -Value "Development"
+Get-Childitem env:
+# Get 
 
 
 **************
