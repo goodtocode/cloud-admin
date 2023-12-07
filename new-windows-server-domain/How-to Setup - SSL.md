@@ -176,6 +176,24 @@ certutil -repairstore My 2 00daf4c78f32e5f5b3564b0b88944a1f34
 certutil -repairstore My 2 51803654f342f78b09964dab5f60c1972736135b
 
 
+**************
+ Test SQL Server connectivity
+**************
+Test-NetConnection -Port 1433 -ComputerName <YourServerName>.database.windows.net
+Install-WindowsFeature -name "Telnet-Client"
+# windows client: dism /online /Enable-Feature /FeatureName:TelnetClient
+telnet servername 1433
+netsh advfirewall firewall show rule name=all | findstr "1433"
+# endless loop - Get-NetFirewallRule | Where-Object { $_.Enabled -eq 'True' } | ForEach-Object { Get-NetFirewallPortFilter -AssociatedNetFirewallRule $_ } | Where-Object { $_.LocalPort -eq 1433 }
+c:\windows\system32\odbcad32.exe
+
+**************
+ Test connectivity
+**************
+ping servername
+nslookup servername
+traceroute servername
+
 
 
 Had same problem, but required a delete of the private key in addition to importing the PFX. 

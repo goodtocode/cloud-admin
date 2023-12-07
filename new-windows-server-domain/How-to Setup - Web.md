@@ -28,7 +28,7 @@ Set-Service -Name "WMSVC" -StartupType Automatic
 
 # Add Anonymous authentication
 Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/security/authentication/anonymousAuthentication' -Name 'enabled' -Value 'True'
-Restart-Service -Name 'W3SVC'
+Restart-Service -Name 'W3SVC' -Force
 # Get anonymous authentication value for website
 Get-WebConfigurationProperty -Filter "/system.webServer/security/authentication/anonymousAuthentication" -Name "value" -PSPath 'IIS:\Sites\YourWebsiteName' | Select-Object value
 # Set For website
@@ -45,6 +45,8 @@ Disable Firewall
 **************
 Set-NetFirewallProfile -Enabled False
 Set-NetFirewallProfile -Profile Domain -Enabled False
+# Check status of firewall enabled/disabled
+Get-NetFirewallProfile | Format-Table Name, Enabled
 
 **************
 Firewall Rules
