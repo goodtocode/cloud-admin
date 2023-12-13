@@ -27,11 +27,19 @@
 > Add-DnsServerForwarder
 -- First check if DNS IN is enabled in firewall for root hints to work
 
-**************
+# **************
  Join Domain
-**************
+# **************
 > Get-ADDomain
 > Add-Computer -DomainName prod.goodtocode.com -Credential prod\Administrator -Restart
+
+# **************
+ Remove Domain
+# **************
+$credential = Get-Credential
+Remove-Computer -UnjoinDomainCredential $credential -PassThru -Verbose -Restart -Force
+# use netdom when trust relationship is broken, Powershell failed
+netdom remove computername /Domain: /UserD: /PasswordD: /Force
 
 **************
  Create New AD Group

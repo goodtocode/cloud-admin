@@ -183,7 +183,7 @@ netsh interface ipv4 add address 5 192.168.1.99 255.255.255.0; `
 **************
 Web Site (App pool, Site, Port 80 + Header, Port 80 + IP Address)
 **************
-- c:\Windows\System32\inetsrv\inetmgr.exe
+c:\Windows\System32\inetsrv\inetmgr.exe
 > Get-WebSite
 > Get-WebConfiguration -filter '/system.applicationHost/sites/site/*'
 > Get-WebConfiguration -filter '/system.applicationHost/sites/site/[@name='cart.goodtocode.com']/*' 
