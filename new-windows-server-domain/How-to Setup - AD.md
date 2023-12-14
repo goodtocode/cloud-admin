@@ -38,8 +38,19 @@
 # **************
 $credential = Get-Credential
 Remove-Computer -UnjoinDomainCredential $credential -PassThru -Verbose -Restart -Force
-# use netdom when trust relationship is broken, Powershell failed
+
+# Situation: trust relationship broken. 
+## Had to disable NLA via azure portal to login via RDP.
+Write-Output 'Configuring registry to disable Network Level Authentication (NLA).'
+$path = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp'
+Set-ItemProperty -Path $path -Name UserAuthentication -Type DWord -Value 0
+Write-Output 'Restart the VM for the change to take effect.'
+## Then used netdom to unjoin from domain (PS1 failed)
 netdom remove computername /Domain: /UserD: /PasswordD: /Force
+## re-enable NLA
+$path = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp'
+Set-ItemProperty -Path $path -Name UserAuthentication -Type DWord -Value 1
+
 
 **************
  Create New AD Group
