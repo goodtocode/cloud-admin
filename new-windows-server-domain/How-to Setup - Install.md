@@ -128,7 +128,7 @@ Import-Module PSWindowsUpdate; Get-WindowsUpdate; Install-WindowsUpdate;
 **************
 (Optional) Add local administrators
 **************
-> Add-LocalGroupMember -Group "Administrators" -Member "AzureAD\\'group name with spaces'"
+> Add-LocalGroupMember -Group "Administrators" -Member "DOMAIN\Group"
 
 **************
 (Optional) Install winget

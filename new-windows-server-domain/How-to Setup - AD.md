@@ -31,7 +31,7 @@
  Join Domain
 # **************
 > Get-ADDomain
-> Add-Computer -DomainName prod.goodtocode.com -Credential prod\Administrator -Restart
+> Add-Computer -DomainName DMAIN -Credential DOMAIN\ADMIN_USER -Restart
 
 # **************
  Remove Domain

@@ -6,7 +6,7 @@
 #   3. Change directory to the script folder:
 #      CD C:\Temp (wherever your script is)
 #   4. In powershell, run script: 
-#      .\Add-RemoteDesktopUsers.ps1 -ComputerName "Computer1" -UserName "User1", "User2", "User3"
+#      .\Add-LocalGroupMember -Member
 ####################################################################################
 
 param (
@@ -26,18 +26,4 @@ Write-Host "*****************************"
 ####################################################################################
 # Imports
 
-
-function Add-RemoteDesktopUsers {
-    [cmdletbinding()]
-    param (
-        [string[]] $UserName,
-        [string] $ComputerName
-    )
-    ForEach ($User in $UserName) {
-        Invoke-Command -ComputerName $ComputerName -ScriptBlock {
-            NET LOCALGROUP "Remote Desktop Users" "$Using:User" /ADD
-        }
-    }
-}
-
-Add-RemoteDesktopUsers -ComputerName "vm-micro-qa-01" -UserName "rgood@aacn.org"
+Add-LocalGroupMember -Group "Remote Desktop Users" -Member "DOMAIN\Group"
