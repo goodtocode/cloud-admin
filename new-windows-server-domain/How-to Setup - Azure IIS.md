@@ -34,3 +34,8 @@
 4. Copy/paste powershell
 5. Alter powershell to include --agent $env:COMPUTERNAME-###. Whereas ### is the acronym for Azure DevOps Project
 >.\config.cmd --environment --environmentname "QA" --agent $env:COMPUTERNAME-PROJECT --runasservice --work '_work' --url 'https://dev.azure.com/ORG/' --projectname 'PROJECT' --auth PAT --token PAT
+
+## Install Runtimes
+1. For .NET Core and beyond: .NET Runtime. I.e. dotnet-hosting-7.0.5-win.exe
+1. For react and node: Node.js. I.e. node-v14.17.0-x64.exe
+1. For older ASP.NET MVC 5 and below: Rewrite module. I.e. rewrite_amd64_en-US.exe
