@@ -125,6 +125,10 @@ Verify
 > Get-WUInstall -MicrosoftUpdate -ListOnly 
 Import-Module PSWindowsUpdate; Get-WindowsUpdate; Install-WindowsUpdate;
 
+# Logging on as local admin after joing Azure VM to the domain
+- .\LocaUser
+- PW
+
 **************
 (Optional) Add local administrators
 **************

@@ -21,6 +21,8 @@
 1. Add domain user to Remote Users group
 * Azure portal - Virtual Machine - Run command
 > Add-LocalGroupMember -Group "Remote Desktop Users" -Member "DOMAIN\Group"
+* OR Login with local administrator
+> User: .\LocalAdminName
 2. Login with domain user
 3. Start powershell with local admin (domain users arent admins unless Global Administrators)
 > sconfig or powershell.exe
