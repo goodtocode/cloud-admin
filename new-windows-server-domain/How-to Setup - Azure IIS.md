@@ -41,3 +41,38 @@
 1. For .NET Core and beyond: .NET Runtime. I.e. dotnet-hosting-7.0.5-win.exe
 1. For react and node: Node.js. I.e. node-v14.17.0-x64.exe
 1. For older ASP.NET MVC 5 and below: Rewrite module. I.e. rewrite_amd64_en-US.exe
+
+## IIS
+### Install IIS Feature 
+1. Install IIS
+> Install-WindowsFeature Web-Server
+
+### Install IIS MMC
+1. Install Web Management Console
+> Install-WindowsFeature -Name Web-Mgmt-Console
+1. Verify by running MMC
+> c:\windows\system32\inetsrv\inetmgr.exe
+
+### Add Anonymous authentication
+1. Add anonymous authentication method
+> Set-WebConfigurationProperty -PSPath 'MACHINE/WEBROOT/APPHOST' -Filter 'system.webServer/security/authentication/anonymousAuthentication' -Name 'enabled' -Value 'True'
+> Restart-Service -Name 'W3SVC' -Force
+
+1. Get anonymous authentication value for website
+> Get-WebConfigurationProperty -Filter "/system.webServer/security/authentication/anonymousAuthentication" -Name "value" -PSPath 'IIS:\Sites\YourWebsiteName' | Select-Object value
+
+1. Set For website
+> Set-WebConfigurationProperty -Filter '/system.webServer/security/authentication/anonymousAuthentication' -Name 'enabled' -Value $true -PSPath 'IIS:\Sites\YourWebsiteName'
+> Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST/YourWebsiteName' -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "True"
+
+1. Set For subfolder
+> Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST/YourWebsiteName' -filter "system.webServer/security/authentication/anonymousAuthentication" -name "enabled" -value "True" -Location "Subfolder"
+
+### Environment variable
+1. ASPNETCORE_ENVIRONMENT
+> Set-Item -Path Env:ASPNETCORE_ENVIRONMENT -Value "Development"
+
+## SSL Cert
+1. Add to LocalMachine\My
+> Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\LocalMachine\My
+
