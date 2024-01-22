@@ -70,9 +70,20 @@
 
 ### Environment variable
 1. ASPNETCORE_ENVIRONMENT
+> Get-Childitem env:
 > Set-Item -Path Env:ASPNETCORE_ENVIRONMENT -Value "Development"
+1. Make sure changes take effect
+> Restart-Computer
 
 ## SSL Cert
 1. Add to LocalMachine\My
 > Import-PfxCertificate -FilePath C:\mycert.pfx -Password (ConvertTo-SecureString -String 'mypassword' -AsPlainText -Force) -CertStoreLocation Cert:\LocalMachine\My
 
+## Install .NET Hosting Bundle
+1. Install .NET 7 (or preferred version)
+- Winget
+> winget install --id=Microsoft.dotnetHostingBundle -e --version 7.0
+- Powershell
+> Invoke-WebRequest -Uri "https://download.visualstudio.microsoft.com/download/pr/973c909f-7e10-4a36-b9dd-7c56e21a3663/2c6f8aa6e5a3e84f91f1e79e6e3705e1/dotnet-hosting-7.0.0-win.exe" -OutFile "dotnet-hosting-7.0.0-win.exe"
+
+> Start-Process -FilePath ".\dotnet-hosting-7.0.0-win.exe" -ArgumentList "/quiet" -Wait
