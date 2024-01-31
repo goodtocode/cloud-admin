@@ -88,6 +88,15 @@ Get-WebVirtualDirectory -Site "Default Web Site" -Application "TestApp"
 Remove-IISSite -Name "MyWebsite"
 Remove-WebAppPool -Name "MyAppPool"
 
+# Test Microservice
+> $uri = 'https://microservices.domain.com/VirtualDir/Endpoint?key=ad790f32-f501-4838-8e4a-c1b057c44f30&api-version=1.0.0'
+> $token = 'BEARER-TOKEN-HERE'
+> $headers = @{
+>     'accept' = 'text/plain'
+>     'Authorization' = "Bearer $token"
+> }
+> Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+
 
 **************
 Start sites and app pools
