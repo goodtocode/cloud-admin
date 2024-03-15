@@ -70,9 +70,9 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 ```
 
 ## Power Platform Development
-### Pac CLI (pac)
+### Pac CLI in Visual Studio Code (pac)
 ```
-winget install --id Microsoft.PowerPlatform.CLI --silent
+code --install-extension microsoft-IsvExpTools.powerplatform-vscode
 ```
 
 ## Azure Development
