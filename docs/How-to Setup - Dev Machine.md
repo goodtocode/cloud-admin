@@ -74,12 +74,25 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 ```
 code --install-extension microsoft-IsvExpTools.powerplatform-vscode
 ```
+Optionally connect and download metadata
+```
+pac auth create
+pac org select -env ENV_GUID
+pac portal list
+pac paportal list
+pac paportal download -p ./src -id PORTAL_GUID -o true -mv 2
+```
 
 ## Azure Development
 ### Azure Function Core Tools CLI (func)
 ```
 winget install Microsoft.AzureFunctionsCoreTools --silent
 ```
+(Optional) Run an Azure Function host in https
+```
+func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass1234 --verbose
+```
+
 
 ### Azurite Storage Emulator
 ```
