@@ -87,9 +87,14 @@ Optionally connect and download metadata
 ```
 pac auth create
 pac org select -env ENV_GUID
-pac portal list
 pac paportal list
 pac paportal download -p ./src -id PORTAL_GUID -o true -mv 2
+```
+Optionally connect and upload metadata
+```
+pac auth create
+pac org select -env ENV_GUID
+> pac paportal upload -p ./src
 ```
 
 ## Azure Development
