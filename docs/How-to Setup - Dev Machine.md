@@ -47,6 +47,11 @@ winget install Microsoft.WindowsTerminal --silent
 winget install Microsoft.AzureDataStudio --silent
 ```
 
+### Paint.NET
+```
+winget install Paint.NET --silent
+```
+
 ## .NET Development
 ### .NET SDK (dotnet)
 ```
