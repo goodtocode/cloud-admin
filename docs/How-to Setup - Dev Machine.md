@@ -73,6 +73,10 @@ $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";"
 ### Pac CLI in Visual Studio Code (pac)
 ```
 code --install-extension microsoft-IsvExpTools.powerplatform-vscode
+
+// Was still missing npm dependencies
+cd c:\Users\[username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\powerpages
+npm update
 ```
 Optionally connect and download metadata
 ```
