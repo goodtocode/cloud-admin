@@ -28,6 +28,7 @@ git config --global user.name "Your Name"
 
 ## IDEs and Editors
 ### Visual Studio
+[Visual Studio Workload IDs](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022&preserve-view=true)
 ```
 winget install --id Microsoft.VisualStudio.2022.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.NetWeb"
 ```
