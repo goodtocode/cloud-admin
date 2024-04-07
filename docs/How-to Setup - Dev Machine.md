@@ -116,7 +116,7 @@ func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass
 
 ### Azurite Storage Emulator
 ```
-winget install Microsoft.AzureStorageEmulator --silent
+npm install -g azurite
 ```
 
 
