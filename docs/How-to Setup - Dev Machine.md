@@ -119,6 +119,11 @@ func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass
 npm install -g azurite
 ```
 
+## SQL Server Development
+### SQL Server 2022  Developer Edition
+```
+winget install --id=Microsoft.SQLServer.2022.Developer -e --override "/IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=Install /quiet"
+```
 
 
 
