@@ -5,7 +5,7 @@
 #   3. Change directory to the script folder:
 #      CD C:\Temp (wherever your script is)
 #   4. In powershell, run script: 
-#      .\Export-SelfSignedCert -Path .\dev.myorg.com.pfx -Password MyPass1234 -Dns dev.myorg.com
+#      .\Export-Certificate -Path .\dev.myorg.com.pfx -Password MyPass1234 -Dns dev.myorg.com
 
 param (
 	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
@@ -26,12 +26,12 @@ Write-Host "*****************************"
 Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
-$foundCert = Get-ChildItem -Path $CertStoreLocation | Where-Object Subject -eq "CN=$Dns" | Select-Object *
+$foundCert = Get-ChildItem -Path $CertStoreLocation | Where-Object Subject -eq "CN=$Dns" | Select-Object -First 1
 if($foundCert.Thumbprint.Length -gt 0)
 {    
     ## Found
     $thumbprint=$foundCert.Thumbprint
-    Write-host "Found cert with thumbprint $thumbprint"
+    Write-host "Found cert matching $CertStoreLocation CN=$Dns Thumbprint=$thumbprint"
     ## Export
     $securePw = ConvertTo-SecureString -String $Password -Force –AsPlainText
     Export-PfxCertificate -Cert "$CertStoreLocation\$thumbprint" -FilePath $Path -Password $securePw
