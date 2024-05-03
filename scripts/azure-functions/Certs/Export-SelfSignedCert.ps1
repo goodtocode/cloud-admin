@@ -36,3 +36,6 @@ if($foundCert.Thumbprint.Length -gt 0)
     $securePw = ConvertTo-SecureString -String $Password -Force –AsPlainText
     Export-PfxCertificate -Cert "$CertStoreLocation\$thumbprint" -FilePath $Path -Password $securePw
 }
+else {
+    Write-host "No cert found matching $CertStoreLocation CN=$Dns"
+}
