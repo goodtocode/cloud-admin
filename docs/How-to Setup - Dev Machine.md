@@ -120,12 +120,10 @@ npm install -g azurite
 ```
 
 ## Database Development
-### SQL Server 2022 Developer Edition
+### SQL Server 2022  Developer Edition
 ```
-winget install Microsoft.SQLServer.2022.Developer --silent
+winget install --id=Microsoft.SQLServer.2022.Developer -e --override "/IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=Install /quiet"
 ```
-
-
 
 
 
