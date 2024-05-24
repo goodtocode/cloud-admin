@@ -119,6 +119,13 @@ func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass
 npm install -g azurite
 ```
 
+## Database Development
+### SQL Server 2022 Developer Edition
+```
+winget install Microsoft.SQLServer.2022.Developer --silent
+```
+
+
 
 
 
