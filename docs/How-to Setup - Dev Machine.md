@@ -14,6 +14,11 @@ winget install Microsoft.WindowsTerminal --silent
 winget install --id Microsoft.PowerShell
 ```
 
+### Windows Power Toys
+```
+winget install Microsoft.PowerToys --source winget
+```
+
 ## Git version control system
 ### Git CLI (git)
 ```
