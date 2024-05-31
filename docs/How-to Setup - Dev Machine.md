@@ -14,6 +14,11 @@ winget install Microsoft.WindowsTerminal --silent
 winget install --id Microsoft.PowerShell
 ```
 
+### Windows Power Toys
+```
+winget install Microsoft.PowerToys --source winget
+```
+
 ## Git version control system
 ### Git CLI (git)
 ```
@@ -64,6 +69,21 @@ winget install Paint.NET --silent
 ```
 winget install Microsoft.DotNet.SDK.8 --silent
 ```
+
+### .NET Development SSL Certificate (dotnet)
+Allows dotnet run to use a developer certificate for https operations
+- Generate and install to the cert store (trust) the certificate
+    ```
+    dotnet dev-certs https --trust
+    ```
+- (Optional) Export the certificate
+    ```
+    dotnet dev-certs https -ep ./certificate.crt -p $CREDENTIAL_PLACEHOLDER$ --trust --format PEM
+    ```
+- (Optional) Register certificate to IIS Express
+    ```
+    &"C:\Program Files (x86)\IIS Express\IisExpressAdminCmd.exe" setupSslUrl -url:https://localhost:<port> -CertHash:<CertificateThumbprint>
+    ```
 
 ## Javascript Development
 ### Node.js (node and npm)
@@ -119,10 +139,10 @@ func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass
 npm install -g azurite
 ```
 
-## SQL Server Development
+## Database Development
 ### SQL Server 2022  Developer Edition
 ```
-winget install --id=Microsoft.SQLServer.2022.Developer -e --override "/IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=Install /quiet"
+winget install Microsoft.SQLServer.2022.Developer -e --override "/IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=Install /quiet"
 ```
 
 
