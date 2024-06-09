@@ -6,7 +6,7 @@
 ## Terminals and scripting
 ### Windows Terminal
 ```
-winget install Microsoft.WindowsTerminal --silent
+winget install --id Microsoft.WindowsTerminal --silent
 ```
 
 ### Powershell
@@ -16,7 +16,12 @@ winget install --id Microsoft.PowerShell
 
 ### Windows Power Toys
 ```
-winget install Microsoft.PowerToys --source winget
+winget install --id Microsoft.PowerToys --source winget
+```
+
+### Smartbear SoapUI API Testing
+```
+winget install --id Smartbear.SoapUI --source winget
 ```
 
 ## Git version control system
