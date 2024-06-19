@@ -120,3 +120,9 @@ Get-Service | select name, status
 Get-EventLog -LogName "system" -Source "Service*" | Where { $_.Message -like '*VSTS Agent*' } | Select timewritten, entrytype, source, eventid, message -first 20 | format-list
 Get-EventLog -LogName application | Select-Object Message | Format-Table -Wrap
 Get-EventLog -LogName application -Message "*bootstrapper*" | Select-Object Message | Format-Table -Wrap
+
+# Installing Desktop Experience
+```
+dism /online /get-features
+dism /online /enable-feature /featurename:Server-Gui-Shell
+```
