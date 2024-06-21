@@ -130,6 +130,11 @@ pac org select -env ENV_GUID
 ```
 
 ## Azure Development
+### Azure CLI
+```
+winget install Microsoft.AzureCLI --silent
+```
+
 ### Azure Function Core Tools CLI (func)
 ```
 winget install Microsoft.AzureFunctionsCoreTools --silent
