@@ -134,7 +134,10 @@ pac org select -env ENV_GUID
 ```
 winget install Microsoft.AzureCLI --silent
 ```
-
+### Azure Bicep CLI
+```
+winget install -e --id Microsoft.Bicep --silent
+```
 ### Azure Function Core Tools CLI (func)
 ```
 winget install Microsoft.AzureFunctionsCoreTools --silent
