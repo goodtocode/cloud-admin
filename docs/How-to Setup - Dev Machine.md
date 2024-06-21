@@ -134,7 +134,7 @@ pac org select -env ENV_GUID
 ```
 winget install Microsoft.AzureCLI --silent
 ```
-### Azure Bicep CLI
+### Azure Bicep CLI (install python first)
 ```
 winget install -e --id Microsoft.Bicep --silent
 ```
