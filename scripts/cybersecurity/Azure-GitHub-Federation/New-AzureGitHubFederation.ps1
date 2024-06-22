@@ -50,7 +50,7 @@ New-AzRoleAssignment -ObjectId $objectId -RoleDefinitionName Contributor -Scope 
 $clientId = (Get-AzADApplication -DisplayName $PrincipalName).AppId
 $tenantId = (Get-AzContext).Subscription.TenantId
 
-# Create a new Azure AD Enterprise application and service principal
+# Create new App Registration Federated Credentials for the GitHub operations
 $subjectRepo = $subjectRepo = "repo:" + $Organization + "/" + $Repository + ":environment:" + $Environment
 New-AzADAppFederatedCredential -ApplicationObjectId $objectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com/' -Name "$PrincipalName-repo" -Subject "$subjectRepo"
 $subjectRepoMain = "repo:" + $Organization + "/" + $Repository + ":ref:refs/heads/main"
