@@ -2,7 +2,7 @@
 #   1. In powershell, set security polilcy for this script: 
 #      Set-ExecutionPolicy Unrestricted -Scope Process -Force
 #   3. Change directory to the script folder:
-#      CD C:\Temp (wherever your script is)
+#      CD C:\Scripts (wherever your script is)
 #   4. In powershell, run script: 
 #      .\Start-Host
 ####################################################################################
