@@ -58,6 +58,6 @@ New-AzADAppFederatedCredential -ApplicationObjectId $objectId -Audience api://Az
 $subjectRepoPR = "repo:" + $Organization + "/" + $Repository + ":pull_request"
 New-AzADAppFederatedCredential -ApplicationObjectId $objectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com/' -Name "$PrincipalName-PR" -Subject "$subjectRepoPR"
 
-Write-Host "TenantId: $tenantId"
-Write-Host "SubscriptionId: $SubscriptionId"
-Write-Host "ClientId: $clientId"
+Write-Host "AZURE_TENANT_ID: $tenantId"
+Write-Host "AZURE_SUBSCRIPTION_ID: $SubscriptionId"
+Write-Host "AZURE_CLIENT_ID: $clientId"
