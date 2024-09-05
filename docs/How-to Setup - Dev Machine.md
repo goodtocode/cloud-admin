@@ -132,7 +132,7 @@ pac org select -env ENV_GUID
 ## Azure Development
 ### Azure Function Core Tools CLI (func)
 ```
-winget install Microsoft.AzureFunctionsCoreTools --silent
+winget install Microsoft.Azure.FunctionsCoreTools --silent
 ```
 (Optional) Run an Azure Function host in https
 ```
