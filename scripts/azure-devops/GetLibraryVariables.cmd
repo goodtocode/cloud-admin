@@ -1,0 +1,1 @@
+az pipelines variable-group variable list --organization https://dev.azure.com/{AzureDevopsOrg}/ --project {AzureDevOpsProject} --group-id {AzureDevOpsVariableGroup} --output table | select-string -pattern '({KeyBeginsWith}.*)|({KeyBeginsWith}.*)'
