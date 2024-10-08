@@ -108,15 +108,18 @@ winget install -e --id OpenJS.NodeJS --silent
 ```
 winget install python.python.3.12 --silent
 ```
-(Optional) Refresh PATH environment variable
-```
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-```
 
 ## Power Platform Development
 ### Pac CLI in Visual Studio Code (pac)
+Install VS Code Extension
 ```
 code --install-extension microsoft-IsvExpTools.powerplatform-vscode
+```
+
+pac was still not recognized (in VSCode or in Terminal)
+```
+[System.Environment]::SetEnvironmentVariable("Path", [System.Environment]::GetEnvironmentVariable("Path", "User") + ";C:\Users\[your_username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools", "User")
+```
 
 // Was still missing npm dependencies
 cd c:\Users\[username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\powerpages
