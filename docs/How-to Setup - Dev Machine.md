@@ -55,9 +55,16 @@ Common workloads:
 * Microsoft.VisualStudio.Workload.VisualStudioExtension
 
 ### VS Code (code .)
+Install VS Code
 ```
 winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
 ```
+Add C# DevKit to VS Code
+```
+code --install-extension ms-dotnettools.csharp
+```
+
+
 
 ### Azure Data Studio (code)
 ```
