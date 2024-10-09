@@ -116,12 +116,12 @@ Install VS Code Extension
 code --install-extension microsoft-IsvExpTools.powerplatform-vscode
 ```
 
-pac was still not recognized (in VSCode or in Terminal)
+Command not found? Ensure path environment variable is updated with tools folder
 ```
-[System.Environment]::SetEnvironmentVariable("Path", [System.Environment]::GetEnvironmentVariable("Path", "User") + ";C:\Users\[your_username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools", "User")
+[System.Environment]::SetEnvironmentVariable("Path", [System.Environment]::GetEnvironmentVariable("Path", "User") + ";C:\Users\[your_user_name]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools", "User")
 ```
 
-// Was still missing npm dependencies
+Command not found? Try npm update
 cd c:\Users\[username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\powerpages
 npm update
 ```
