@@ -11,5 +11,5 @@ $events = Get-WinEvent -FilterHashtable @{
 $events | Select-Object TimeCreated, Id, LevelDisplayName, Message | Export-CSV -Path "C:\temp\eventlog-$logName-$startDate-$endDate.csv" -NoTypeInformation
 
 # Get all events
-#$events = Get-WinEvent -ComputerName "ilscweb06.aacn.org" -LogName "Application"
+#$events = Get-WinEvent -ComputerName "myserver.myco.org" -LogName "Application"
 #$events | Select-Object TimeCreated, Id, LevelDisplayName, Message | Export-CSV -Path "C:\temp\eventlog-all.csv" -NoTypeInformation
