@@ -6,6 +6,7 @@
 #      CD C:\Scripts (wherever your script is)
 #   3. In powershell, run script: 
 #      .\Update-LoadBalancer.ps1 -IPAddress 111.222.333.4444 -ServerId 12345 -ApiKey 00000000-0000-0000-0000-000000000000 -ApiId 12345
+# Imperva Swagger: https://docs.imperva.com/bundle/cloud-application-security/page/cloud-v1-api-definition.htm
 ####################################################################################
 
 param (
@@ -18,7 +19,7 @@ param (
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
 	[string]$ApiId = $(throw '-ApiId is a required parameter.'),
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-	[bool]$Enabled = $(throw '-Enabled is a required parameter.')
+	[string]$Enabled = $(throw '-Enabled is a required parameter.')
 )
 ####################################################################################
 Set-ExecutionPolicy Unrestricted -Scope Process -Force
@@ -36,7 +37,14 @@ $headers = @{
     'x-API-Key' = $ApiKey
     'x-API-Id' = $ApiId
 }
-$response = Invoke-RestMethod -Uri "https://my.imperva.com/api/prov/v1/sites/dataCenters/servers/edit?server_id=$ServerId&server_address=$IPAddress&is_enabled=$Enabled&is_standby=true" `
+
+$headers | Select-Object accept, x-API-Key, x-API-Id | Format-Table 
+
+$uri = "https://my.imperva.com/api/prov/v1/sites/dataCenters/servers/edit?server_id=$ServerId&server_address=$IPAddress&is_enabled=$Enabled&is_standby=false"
+
+Write-Host "URI: $uri"
+
+$response = Invoke-RestMethod -Uri $uri `
                                -Method 'POST' `
                                -Headers $headers `
                                -Body ''
