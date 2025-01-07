@@ -34,20 +34,20 @@ Install-Module -Name IISAdministration -Force
 #
 # Execute
 #
-if ((Get-WebAppPoolState -Name $AppPoolName).Value -eq "Stopped") {
+if ((Get-WebAppPoolState -Name $AppPoolName).Value -ne "Stopped") {
     Stop-WebAppPool -Name $AppPoolName
 }
-$appPoolTimeout = 180 
+$appPoolTimeout = 180  # Timeout in seconds (3 minutes)
 $appPoolCounter = 0
 while ((Get-WebAppPoolState -Name $AppPoolName).Value -ne "Stopped" -and $appPoolCounter -lt $appPoolTimeout) {
     Start-Sleep -Seconds 1
     $appPoolCounter++
 }
 if ((Get-WebAppPoolState -Name $AppPoolName).Value -eq "Stopped") {
-    if ((Get-WebsiteState -Name $WebSiteName).Value -eq "Stopped") {
+    if ((Get-WebsiteState -Name $WebSiteName).Value -ne "Stopped") {
         Stop-Website -Name $WebSiteName
     }
-    $websiteTimeout = 180
+    $websiteTimeout = 180  # Timeout in seconds (3 minutes)
     $websiteCounter = 0
     while ((Get-WebsiteState -Name $WebSiteName).Value -ne "Stopped" -and $websiteCounter -lt $websiteTimeout) {
         Start-Sleep -Seconds 1
@@ -55,9 +55,7 @@ if ((Get-WebAppPoolState -Name $AppPoolName).Value -eq "Stopped") {
     }
     if ((Get-WebsiteState -Name $WebSiteName).Value -eq "Stopped") {
         Start-WebAppPool -Name $AppPoolName
-		Write-Host "Started application pool: $AppPoolName"
         Start-Website -Name $WebSiteName
-		Write-Host "Started website: $WebSiteName"
     } else {
         Write-Error "Failed to stop the website within the timeout period."
     }
