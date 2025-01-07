@@ -3,6 +3,8 @@
 $branchPrefix = "release/production" # eg $branchPrefix-$thisTuesday-$nextSprint
 $sprintPrefix = "Sprint"
 
+$monolithNotConfiguredError = 'Where is your monolith? Try $Env:MONOLITH_PATH = "C:\path\to\aacn_website"'
+
 # returns the commands for next release branch name, eg release/production-2024.11.12-Sprint-22 e65a6199f3c902e99a9e18cc4aa1b2f18e1261aa
 function generateGitCommands {
     _isConfigured
