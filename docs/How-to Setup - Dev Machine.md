@@ -55,9 +55,16 @@ Common workloads:
 * Microsoft.VisualStudio.Workload.VisualStudioExtension
 
 ### VS Code (code .)
+Install VS Code
 ```
 winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
 ```
+Add C# DevKit to VS Code
+```
+code --install-extension ms-dotnettools.csharp
+```
+
+
 
 ### Azure Data Studio (code)
 ```
@@ -101,17 +108,20 @@ winget install -e --id OpenJS.NodeJS --silent
 ```
 winget install python.python.3.12 --silent
 ```
-(Optional) Refresh PATH environment variable
-```
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-```
 
 ## Power Platform Development
 ### Pac CLI in Visual Studio Code (pac)
+Install VS Code Extension
 ```
 code --install-extension microsoft-IsvExpTools.powerplatform-vscode
+```
 
-// Was still missing npm dependencies
+Command not found? Ensure path environment variable is updated with tools folder
+```
+[System.Environment]::SetEnvironmentVariable("Path", [System.Environment]::GetEnvironmentVariable("Path", "User") + ";C:\Users\[your_user_name]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\pac\tools", "User")
+```
+
+Command not found? Try npm update
 cd c:\Users\[username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\powerpages
 npm update
 ```
@@ -140,7 +150,7 @@ winget install -e --id Microsoft.Bicep --silent
 ```
 ### Azure Function Core Tools CLI (func)
 ```
-winget install Microsoft.AzureFunctionsCoreTools --silent
+winget install Microsoft.Azure.FunctionsCoreTools --silent
 ```
 (Optional) Run an Azure Function host in https
 ```

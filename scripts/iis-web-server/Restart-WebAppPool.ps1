@@ -10,8 +10,10 @@
 ####################################################################################
 
 param (
-	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
- 	[string]$Name = $(throw '-Name is a required parameter.') #www.mysite.com
+	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]	
+ 	[string]$WebSiteName = $(throw '-WebSiteName is a required parameter.'), #www.mysite.com
+	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]	
+ 	[string]$AppPoolName = $(throw '-AppPoolName is a required parameter.') #www.mysite.com-pool
 )
 
 ####################################################################################
@@ -24,8 +26,41 @@ Write-Host "*****************************"
 Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
+#
 # Modules
-Import-Module "./System.psm1"
-Install-Module -Name IISAdministration
+#
+Install-Module -Name IISAdministration -Force
 
-Restart-WebAppPool -Name $Name
+#
+# Execute
+#
+if ((Get-WebAppPoolState -Name $AppPoolName).Value -ne "Stopped") {
+    Stop-WebAppPool -Name $AppPoolName
+}
+$appPoolTimeout = 180 
+$appPoolCounter = 0
+while ((Get-WebAppPoolState -Name $AppPoolName).Value -ne "Stopped" -and $appPoolCounter -lt $appPoolTimeout) {
+    Start-Sleep -Seconds 1
+    $appPoolCounter++
+}
+if ((Get-WebAppPoolState -Name $AppPoolName).Value -eq "Stopped") {
+    if ((Get-WebsiteState -Name $WebSiteName).Value -ne "Stopped") {
+        Stop-Website -Name $WebSiteName
+    }
+    $websiteTimeout = 180
+    $websiteCounter = 0
+    while ((Get-WebsiteState -Name $WebSiteName).Value -ne "Stopped" -and $websiteCounter -lt $websiteTimeout) {
+        Start-Sleep -Seconds 1
+        $websiteCounter++
+    }
+    if ((Get-WebsiteState -Name $WebSiteName).Value -eq "Stopped") {
+        Start-WebAppPool -Name $AppPoolName
+		Write-Host "Started application pool: $AppPoolName"
+        Start-Website -Name $WebSiteName
+		Write-Host "Started website: $WebSiteName"
+    } else {
+        Write-Error "Failed to stop the website within the timeout period."
+    }
+} else {
+    Write-Error "Failed to stop the application pool within the timeout period."
+}
