@@ -168,6 +168,11 @@ npm install -g azurite
 winget install Microsoft.SQLServer.2022.Developer -e --override "/IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=Install /quiet"
 ```
 
+### Database Queries/ERD
+```
+code --install-extension DBCode.dbcode
+
+
 
 
 
