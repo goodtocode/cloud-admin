@@ -41,3 +41,6 @@ nswag openapi2csclient `
     /input:$swaggerJsonPathFile `
     /output:$ClientPathFile `
     /namespace:$ClientNamespace
+
+# If need to customize, use this command line with the json file
+#nswag run Generate-NswagClientCode.json
