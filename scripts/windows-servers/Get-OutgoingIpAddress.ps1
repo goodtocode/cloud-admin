@@ -5,8 +5,8 @@
 #      Set-ExecutionPolicy Unrestricted -Scope Process -Force
 #   3. Change directory to the script folder:
 #      CD C:\Scripts (wherever your script is)
-#   4. In powershell, run script: 
-#      .\Add-LocalGroupMember -Member
+#   4. In powershell, run script: (Invoke-RestMethod -Uri 'https://api.ipify.org?format=json').ip
+#      .\Get-OutgoingIpAddress
 ####################################################################################
 
 param (	
