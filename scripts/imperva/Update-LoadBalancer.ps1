@@ -5,31 +5,20 @@
 #   2. Change directory to the script folder:
 #      CD C:\Scripts (wherever your script is)
 #   3. In powershell, run script: 
-#      .\Update-LoadBalancer.ps1 -IPAddress 111.222.333.4444 -ServerId 12345 -ApiKey 00000000-0000-0000-0000-000000000000 -ApiId 12345
+#      .\Update-LoadBalancer.ps1 -IPAddress 111.222.333.4444 -SiteId 12345 -ApiKey 00000000-0000-0000-0000-000000000000 -ApiId 12345
 # Imperva Swagger: https://docs.imperva.com/bundle/cloud-application-security/page/cloud-v1-api-definition.htm
 ####################################################################################
 
 param (
-	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
+    [string]$ApiId = $(throw '-ApiId is a required parameter.'),
+	[string]$ApiKey = $(throw '-ApiKey is a required parameter.'),	
+    [string]$SiteId = $(throw '-SiteId is a required parameter.'),
  	[string]$IPAddress = $(throw '-IPAddress is a required parameter.'),
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-    [string]$ServerId = $(throw '-ServerId is a required parameter.'),
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-	[string]$ApiKey = $(throw '-ApiKey is a required parameter.'),
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-	[string]$ApiId = $(throw '-ApiId is a required parameter.'),
-    [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-	[string]$Enabled = $(throw '-Enabled is a required parameter.')
+	[string]$Enabled = "false" #$(throw '-Enabled is a required parameter.')
 )
 ####################################################################################
 Set-ExecutionPolicy Unrestricted -Scope Process -Force
 $VerbosePreference = 'SilentlyContinue' # 'Continue'
-[String]$ThisScript = $MyInvocation.MyCommand.Path
-[String]$ThisDir = Split-Path $ThisScript
-Set-Location $ThisDir # Ensure our location is correct, so we can use relative paths
-Write-Host "*****************************"
-Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
-Write-Host "*****************************"
 ####################################################################################
 
 $headers = @{
@@ -38,13 +27,29 @@ $headers = @{
     'x-API-Id' = $ApiId
 }
 
-$headers | Select-Object accept, x-API-Key, x-API-Id | Format-Table 
+$headers | Select-Object accept, x-API-Id | Format-Table 
 
-$uri = "https://my.imperva.com/api/prov/v1/sites/dataCenters/servers/edit?server_id=$ServerId&server_address=$IPAddress&is_enabled=$Enabled&is_standby=false"
+# Query ServerID Here
+$response = Invoke-RestMethod -Uri "https://my.imperva.com/api/prov/v1/sites/dataCenters/list?site_id=$SiteId" `
+                                -Method 'POST' `
+                                -Headers $headers
 
-Write-Host "URI: $uri"
+$serverId = $null
+foreach ($server in $response.DCs[0].servers) {
+    if ($server.address -eq $IPAddress) {
+        $serverId = $server.id
+        break
+    }
+}
 
-$response = Invoke-RestMethod -Uri $uri `
-                               -Method 'POST' `
-                               -Headers $headers `
-                               -Body ''
+if ($null -eq $serverId) {
+    Write-Host "Server with IP address $IPAddress not found."
+} else {
+    $response = Invoke-RestMethod -Uri "https://my.imperva.com/api/prov/v1/sites/dataCenters/servers/edit?server_id=$serverId&server_address=$IPAddress&is_enabled=$Enabled&is_standby=false" `
+                                   -Method 'POST' `
+                                   -Headers $headers `
+                                   -Body ''
+
+    Write-Host "Response from API:"
+    Write-Host ($response | ConvertTo-Json -Depth 10)
+}
