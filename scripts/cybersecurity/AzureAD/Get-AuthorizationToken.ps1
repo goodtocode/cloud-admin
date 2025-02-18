@@ -6,17 +6,13 @@
 #   3. Change directory to the script folder:
 #      CD C:\Scripts (wherever your script is)
 #   4. In powershell, run script: 
-#      .\Restart-WebAppPool.ps1 -Name "www.mysite.com"
+#      .\Get-AuthorizationToken.ps1 -TenantId "00000000-85ea-42d2-b7b3-30ef2666c7ab" -ClientId "00000000-9f24-40c0-87b8-69bdd5ae60a3" -ClientSecret "SECRET HERE" -Scope "00000000-4ae8-43f7-8c1f-71b3a340d4fd"
 ####################################################################################
 
 param (
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
     [string]$TenantId = $(throw '-TenantId is a required parameter.'),
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
     [string]$ClientId = $(throw '-ClientId is a required parameter.'),
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
     [string]$ClientSecret = $(throw '-ClientSecret is a required parameter.'),
-    [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
     [string]$ScopeClientId = $(throw '-ScopeClientId is a required parameter.')
 )
 
