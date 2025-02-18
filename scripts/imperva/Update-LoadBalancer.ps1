@@ -14,7 +14,7 @@ param (
 	[string]$ApiKey = $(throw '-ApiKey is a required parameter.'),	
     [string]$SiteId = $(throw '-SiteId is a required parameter.'),
  	[string]$IPAddress = $(throw '-IPAddress is a required parameter.'),
-	[string]$Enabled = "false" #$(throw '-Enabled is a required parameter.')
+	[string]$Enabled = $(throw '-Enabled is a required parameter.')
 )
 ####################################################################################
 Set-ExecutionPolicy Unrestricted -Scope Process -Force
@@ -23,11 +23,13 @@ $VerbosePreference = 'SilentlyContinue' # 'Continue'
 
 $headers = @{
     'accept' = 'application/json'
-    'x-API-Key' = $ApiKey
-    'x-API-Id' = $ApiId
+    'x-API-Key' = "$ApiKey"
+    'x-API-Id' = "$ApiId"
 }
 
-$headers | Select-Object accept, x-API-Id | Format-Table 
+$headersObj = New-Object PSObject -Property $headers
+
+$headersObj | Select-Object accept, 'x-API-Id' | Format-Table
 
 # Query ServerID Here
 $response = Invoke-RestMethod -Uri "https://my.imperva.com/api/prov/v1/sites/dataCenters/list?site_id=$SiteId" `
@@ -35,10 +37,12 @@ $response = Invoke-RestMethod -Uri "https://my.imperva.com/api/prov/v1/sites/dat
                                 -Headers $headers
 
 $serverId = $null
-foreach ($server in $response.DCs[0].servers) {
-    if ($server.address -eq $IPAddress) {
-        $serverId = $server.id
-        break
+if ($null -ne $response -and $response.DCs -and $response.DCs.Count -gt 0 -and $response.DCs[0].servers) {
+    foreach ($server in $response.DCs[0].servers) {
+        if ($server.address -eq $IPAddress) {
+            $serverId = $server.id
+            break
+        }
     }
 }
 
