@@ -28,13 +28,12 @@ Set-Location $ThisDir # Ensure our location is correct, so we can use relative p
 Write-Host "---------------------------"
 Write-Host "--- Starting: $ThisScript on $Now"
 Write-Host "---------------------------"
-# Imports
-Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-Import-Module "../../Azure.psm1"
-Import-Module "../../System.psm1"
 # ---
 # --- Install required modules
 # ---
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+Import-Module "../../Azure.psm1"
+Import-Module "../../System.psm1"
 Install-Module -Name Az.Accounts -AllowClobber -Scope CurrentUser
 Install-Module -Name Az.Resources -AllowClobber -Scope CurrentUser
 Install-Module -Name Az.Storage -AllowClobber -Scope CurrentUser
