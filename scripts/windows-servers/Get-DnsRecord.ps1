@@ -25,6 +25,7 @@ Write-Host "---------------------------"
 # ---
 # --- Install/Import
 # ---
+#May need RSAT (Admin): Add-WindowsCapability -Online -Name "Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0"
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Import-Module "../System.psm1"
 if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
