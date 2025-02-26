@@ -8,7 +8,7 @@
 # ---
 param
 (
-	[string] $FQDN="RGood2-10.aacn.org"#$(throw '-FQDN is a required parameter. (www.example.com)'))
+	[string] $FQDN=$(throw '-FQDN is a required parameter. (www.example.com)'))
 )
 # ---
 # --- Initialize
