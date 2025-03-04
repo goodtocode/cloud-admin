@@ -8,7 +8,7 @@
 # ---
 param
 (
-	[string] $FQDN=$(throw '-FQDN is a required parameter. (www.example.com)')
+	[string] $FQDN=""#$(throw '-FQDN is a required parameter. (www.example.com)')
 )
 # ---
 # --- Initialize
@@ -38,9 +38,9 @@ if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
 try {
     $dnsRecord = [System.Net.Dns]::GetHostEntry($FQDN)
     if ($dnsRecord.AddressList) {
-        $ip = $dnsRecord.AddressList[0].IPAddressToString
-        Write-Output "$FQDN is a DNS A record with IP: $ip."
-        
+        foreach ($ip in $dnsRecord.AddressList) {
+            Write-Output "$FQDN has an IP address: $($ip.IPAddressToString)"
+        }        
         # Check for an Active Directory object with the same name
         Import-Module ActiveDirectory
         $adObject = Get-ADComputer -Filter "DNSHostName -eq '$FQDN'"
