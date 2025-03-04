@@ -8,7 +8,7 @@
 # ---
 param
 (
-	[string] $FQDN=""#$(throw '-FQDN is a required parameter. (www.example.com)')
+	[string] $FQDN=$(throw '-FQDN is a required parameter. (www.example.com)')
 )
 # ---
 # --- Initialize
@@ -25,7 +25,7 @@ Write-Host "---------------------------"
 # ---
 # --- Install/Import
 # ---
-#May need RSAT (Admin): Add-WindowsCapability -Online -Name "Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0"
+# May need RSAT (Admin): Add-WindowsCapability -Online -Name "Rsat.ActiveDirectory.DS-LDS.Tools~~~~0.0.1.0"
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 Import-Module "../System.psm1"
 if (-not (Get-Module -ListAvailable -Name ActiveDirectory)) {
@@ -41,7 +41,6 @@ try {
         foreach ($ip in $dnsRecord.AddressList) {
             Write-Output "$FQDN has an IP address: $($ip.IPAddressToString)"
         }        
-        # Check for an Active Directory object with the same name
         Import-Module ActiveDirectory
         $adObject = Get-ADComputer -Filter "DNSHostName -eq '$FQDN'"
         
