@@ -1,14 +1,14 @@
 #-----------------------------------------------------------------------
 # Get-DnsRecord [FQDN [<String>]]
 #
-# Example: .\Get-DnsRecord.ps1 -FQDN "www.example.com"
+# Example: .\Get-MachineName.ps1 -FQDN "www.example.com"
 #-----------------------------------------------------------------------
 # ---
 # --- Parameters
 # ---
 param
 (
-	[string] $FQDN=$(throw '-FQDN is a required parameter. (www.example.com)')
+	[string] $IP=$(throw '-IP is a required parameter. (www.example.com)')
 )
 # ---
 # --- Initialize
@@ -44,31 +44,13 @@ function Get-MachineNameFromIP {
     try {
         $reverseLookup = [System.Net.Dns]::GetHostEntry($IPAddress)
         if ($reverseLookup.HostName) {
-            Write-Output "IP address: $IPAddress - Machine name: $($reverseLookup.HostName)"
+            Write-Output "The IP address $IPAddress is associated with the machine name: $($reverseLookup.HostName)."
         } else {
-            Write-Output "No machine name is associated with the IP address $IPAddress"
+            Write-Output "No machine name is associated with the IP address $IPAddress."
         }
     } catch {
-        Write-Output "Reverse DNS lookup failed for IP address $IPAddress"
+        Write-Output "Reverse DNS lookup failed for IP address $IPAddress."
     }
 }
 
-try {
-    $dnsRecord = [System.Net.Dns]::GetHostEntry($FQDN)
-    if ($dnsRecord.AddressList) {
-        foreach ($ip in $dnsRecord.AddressList) {
-            Write-Output "FQDN: $FQDN - IP address: $($ip.IPAddressToString)"
-            Get-MachineNameFromIP -IPAddress $ip.IPAddressToString
-        }        
-        Import-Module ActiveDirectory
-        $adObject = Get-ADComputer -Filter "DNSHostName -eq '$FQDN'"
-        
-        if ($adObject) {
-            Write-Output "$FQDN - Windows machine"
-        } else {
-            Write-Output "$FQDN - Manual DNS A record"
-        }
-    }
-} catch {
-    Write-Output "$FQDN - Not a DNS A record"
-}
+Get-MachineNameFromIP -IPAddress $ip
