@@ -16,7 +16,10 @@ param (
  	[string]$File = $(throw '-File is a required parameter.'), #MyCert.pfx
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
 	[string]$Domain = $(throw '-Domain is a required parameter.'), #dev.mydomain.com, yourappname.yourtenant.onmicrosoft.com
-	[string]$CertStoreLocation = 'Cert:\LocalMachine\My'
+	[string]$CertStoreLocation = 'Cert:\LocalMachine\My',
+    [int]$ExpirationMonths = 24,
+    [int]$KeyLength = 2048,
+    [string]$Password = (New-Guid).ToString()
 )
 
 ####################################################################################
@@ -30,14 +33,13 @@ Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
 # Imports
-Import-Module "./System.psm1"
+Import-Module "../../System.psm1"
 $crlf = "`r`n"
 
 $Path = Remove-Suffix -String $Path -Remove "\"
 $File = Remove-Prefix -String $File -Remove "." 
 $File = Remove-Prefix -String $File -Remove "." 
 $File = Remove-Prefix -String $File -Remove "\"
-[String] $Password = New-Guid
 [String] $FilePath = "$Path\$File"
 
 New-Path $Path
@@ -59,9 +61,9 @@ $Certificate = New-SelfSignedCertificate `
     -KeyExportPolicy Exportable `
     -Subject "CN=$Domain" `
     -KeyAlgorithm RSA `
-    -KeyLength 2048 `
+    -KeyLength $KeyLength `
     -KeyUsage DigitalSignature `
-    -NotAfter (Get-Date).AddMonths(12) `
+    -NotAfter (Get-Date).AddMonths($ExpirationMonths) `
     -CertStoreLocation $CertStoreLocation
 $thumbprint=$Certificate.Thumbprint
 Write-Host "$crlf[Info] Created $CertStoreLocation with thumbprint $thumbprint $crlf"
