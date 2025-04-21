@@ -14,10 +14,15 @@ param (
 )
 ####################################################################################
 Set-ExecutionPolicy Unrestricted -Scope Process -Force
-$VerbosePreference = 'SilentlyContinue' # 'Continue'
-[String]$ThisScript = $MyInvocation.MyCommand.Path
+$VerbosePreference = 'SilentlyContinue' # 'SilentlyContinue' # 'Continue'
+if ($MyInvocation.MyCommand.Path) {
+    [String]$ThisScript = $MyInvocation.MyCommand.Path
+} else {
+    [String]$ThisScript = (Get-Location).Path
+}
 [String]$ThisDir = Split-Path $ThisScript
 Set-Location $ThisDir # Ensure our location is correct, so we can use relative paths
+
 Write-Host "*****************************"
 Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"

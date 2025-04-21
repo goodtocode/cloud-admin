@@ -25,9 +25,14 @@ param (
 ####################################################################################
 Set-ExecutionPolicy Unrestricted -Scope Process -Force
 $VerbosePreference = 'SilentlyContinue' # 'SilentlyContinue' # 'Continue'
-[String]$ThisScript = $MyInvocation.MyCommand.Path
+if ($MyInvocation.MyCommand.Path) {
+    [String]$ThisScript = $MyInvocation.MyCommand.Path
+} else {
+    [String]$ThisScript = (Get-Location).Path
+}
 [String]$ThisDir = Split-Path $ThisScript
 Set-Location $ThisDir # Ensure our location is correct, so we can use relative paths
+
 Write-Host "*****************************"
 Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
@@ -56,7 +61,10 @@ if($foundCert.Thumbprint.Length -gt 0)
     $thumbprint = ""
 }
 
-# Create
+$EKU = @("1.3.6.1.5.5.7.3.1") # Server Authentication
+# $EKU = @("1.3.6.1.5.5.7.3.2") # Client Authentication instead of Server Authentication
+# $EKU = @("1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.2") # Both Server and Client Authentication
+
 $Certificate = New-SelfSignedCertificate `
     -KeyExportPolicy Exportable `
     -Subject "CN=$Domain" `
@@ -64,8 +72,9 @@ $Certificate = New-SelfSignedCertificate `
     -KeyLength $KeyLength `
     -KeyUsage DigitalSignature `
     -NotAfter (Get-Date).AddMonths($ExpirationMonths) `
-    -CertStoreLocation $CertStoreLocation
-$thumbprint=$Certificate.Thumbprint
+    -CertStoreLocation $CertStoreLocation `
+    -TextExtension @("2.5.29.37={text}$($EKU -join ',')")
+$thumbprint = $Certificate.Thumbprint
 Write-Host "$crlf[Info] Created $CertStoreLocation with thumbprint $thumbprint $crlf"
 
 # Export Pfx
