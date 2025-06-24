@@ -5,7 +5,7 @@
 #   3. Change directory to the script folder:
 #      CD C:\Scripts (wherever your script is)
 #   4. In powershell, run script: 
-#      .\Export-Certificate -Path .\dev.myorg.com.pfx -Password MyPass1234 -Dns dev.myorg.com
+#      .\New-RandomValue -Length 16
 
 param (
 	[int]$Length = 16

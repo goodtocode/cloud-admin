@@ -122,6 +122,7 @@ Command not found? Ensure path environment variable is updated with tools folder
 ```
 
 Command not found? Try npm update
+```
 cd c:\Users\[username]\AppData\Roaming\Code\User\globalStorage\microsoft-isvexptools.powerplatform-vscode\powerpages
 npm update
 ```
