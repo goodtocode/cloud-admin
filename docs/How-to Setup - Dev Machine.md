@@ -75,6 +75,20 @@ winget install Paint.NET --silent
 winget install Microsoft.DotNet.SDK.8 --silent
 ```
 
+### dotnet ef cli
+Install
+```
+dotnet tool install --global dotnet-ef
+```
+Update
+```
+dotnet tool update --global dotnet-ef
+```
+Remember to add the following package to appropriate project
+```
+dotnet add package Microsoft.EntityFrameworkCore.Design
+```
+
 ### .NET Development SSL Certificate (dotnet)
 Allows dotnet run to use a developer certificate for https operations
 - Generate and install to the cert store (trust) the certificate
@@ -89,6 +103,43 @@ Allows dotnet run to use a developer certificate for https operations
     ```
     &"C:\Program Files (x86)\IIS Express\IisExpressAdminCmd.exe" setupSslUrl -url:https://localhost:<port> -CertHash:<CertificateThumbprint>
     ```
+
+
+## Azure Development
+### Azure CLI
+```
+winget install Microsoft.AzureCLI --silent
+```
+### Azure Bicep CLI (install python first)
+```
+winget install -e --id Microsoft.Bicep --silent
+```
+### Azure Function Core Tools CLI (func)
+```
+winget install Microsoft.Azure.FunctionsCoreTools --silent
+```
+(Optional) Run an Azure Function host in https
+```
+func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass1234 --verbose
+```
+
+### Azurite Storage Emulator
+```
+npm install -g azurite
+```
+
+## Database Development
+### SQL Server 2022  Developer Edition
+Visual Studio installs SQL Express. If you want full-featured SQL Server, install the SQL Server Developer Edition or above.
+[SQL Server Developer Edition or above](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
+```
+winget install Microsoft.SQLServer.2022.Developer -e --override "/Q /IACCEPTSQLSERVERLICENSETERMS /ACTION=Install /FEATURES=SQLENGINE /INSTANCENAME=SQLEXPRESS /ENU"
+```
+
+### Database Queries/ERD
+```
+code --install-extension DBCode.dbcode
+```
 
 ## Javascript Development
 ### Node.js (node and npm)
@@ -132,41 +183,3 @@ pac auth create
 pac org select -env ENV_GUID
 > pac paportal upload -p ./src
 ```
-
-## Azure Development
-### Azure CLI
-```
-winget install Microsoft.AzureCLI --silent
-```
-### Azure Bicep CLI (install python first)
-```
-winget install -e --id Microsoft.Bicep --silent
-```
-### Azure Function Core Tools CLI (func)
-```
-winget install Microsoft.Azure.FunctionsCoreTools --silent
-```
-(Optional) Run an Azure Function host in https
-```
-func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass1234 --verbose
-```
-
-### Azurite Storage Emulator
-```
-npm install -g azurite
-```
-
-## Database Development
-### SQL Server 2022  Developer Edition
-```
-winget install Microsoft.SQLServer.2022.Developer -e --override "/IACCEPTSQLSERVERLICENSETERMS /ENU /ACTION=Install /quiet"
-```
-
-### Database Queries/ERD
-```
-code --install-extension DBCode.dbcode
-
-
-
-
-
