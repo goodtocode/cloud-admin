@@ -11,7 +11,7 @@ winget install --id Microsoft.WindowsTerminal --silent
 
 ### Powershell
 ```
-winget install --id Microsoft.PowerShell
+winget install --id Microsoft.PowerShell --silent
 ```
 
 ### Windows Power Toys
@@ -62,13 +62,6 @@ winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runc
 Add C# DevKit to VS Code
 ```
 code --install-extension ms-dotnettools.csharp
-```
-
-
-
-### Azure Data Studio (code)
-```
-winget install Microsoft.AzureDataStudio --silent
 ```
 
 ### Paint.NET
