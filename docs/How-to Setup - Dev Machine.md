@@ -72,38 +72,18 @@ winget install Paint.NET --silent
 ## .NET Development
 ### .NET SDK (dotnet)
 ```
-winget install Microsoft.DotNet.SDK.8 --silent
+winget install Microsoft.DotNet.SDK.9 --silent
 ```
 
-### dotnet ef cli
-Install
+### .NET Entity Framework CLI (dotnet ef)
+Installf
 ```
 dotnet tool install --global dotnet-ef
 ```
-Update
-```
-dotnet tool update --global dotnet-ef
-```
-Remember to add the following package to appropriate project
+Remember to add the following package to appropriate project for migrations and scaffolding
 ```
 dotnet add package Microsoft.EntityFrameworkCore.Design
 ```
-
-### .NET Development SSL Certificate (dotnet)
-Allows dotnet run to use a developer certificate for https operations
-- Generate and install to the cert store (trust) the certificate
-    ```
-    dotnet dev-certs https --trust
-    ```
-- (Optional) Export the certificate
-    ```
-    dotnet dev-certs https -ep ./certificate.crt -p $CREDENTIAL_PLACEHOLDER$ --trust --format PEM
-    ```
-- (Optional) Register certificate to IIS Express
-    ```
-    &"C:\Program Files (x86)\IIS Express\IisExpressAdminCmd.exe" setupSslUrl -url:https://localhost:<port> -CertHash:<CertificateThumbprint>
-    ```
-
 
 ## Azure Development
 ### Azure CLI
@@ -183,3 +163,18 @@ pac auth create
 pac org select -env ENV_GUID
 > pac paportal upload -p ./src
 ```
+
+### .NET Development SSL Certificate (dotnet)
+Allows dotnet run to use a developer certificate for https operations
+- Generate and install to the cert store (trust) the certificate
+    ```
+    dotnet dev-certs https --trust
+    ```
+- (Optional) Export the certificate
+    ```
+    dotnet dev-certs https -ep ./certificate.crt -p $CREDENTIAL_PLACEHOLDER$ --trust --format PEM
+    ```
+- (Optional) Register certificate to IIS Express
+    ```
+    &"C:\Program Files (x86)\IIS Express\IisExpressAdminCmd.exe" setupSslUrl -url:https://localhost:<port> -CertHash:<CertificateThumbprint>
+    ```
