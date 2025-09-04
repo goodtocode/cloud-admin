@@ -1,0 +1,58 @@
+// Ctrl+Shift+P - Configure Kusto Connection
+
+
+
+union 
+    pageViews,
+    customEvents,
+    traces,
+    exceptions,
+    requests
+| where url endswith "/store/checkout"
+    or name has "checkout"
+    or customDimensions.pageName == "/store/checkout"
+| extend eventType = case(
+                         itemType == "pageView",
+                         "PageView",
+                         itemType == "customEvent",
+                         "CustomEvent",
+                         itemType == "trace",
+                         "Trace",
+                         itemType == "exception",
+                         "Exception",
+                         itemType == "request",
+                         "Request",
+                         "Other"
+                     )
+| extend errorMessage = coalesce(message, tostring(customDimensions.errorMessage), tostring(customDimensions.divErrorText))
+| extend userId = tostring(user_Id), sessionId = tostring(session_Id)
+| summarize
+    errorCount = countif(eventType in ("Exception", "Trace") and errorMessage != ""), 
+    totalEvents = count(), 
+    errors = make_list(errorMessage, 10)
+    by bin(timestamp, 1d), userId, sessionId
+| order by timestamp desc
+
+
+// appInsights.trackTrace({
+//   message: "Payment error: Invalid card number",
+//   severityLevel: 2,
+//   properties: {
+//     pageName: "/store/checkout",
+//     errorType: "PaymentValidation",
+//     field: "cardNumber"
+//   }
+// });
+
+union isfuzzy=true exceptions
+| where timestamp > datetime("2025-07-21T22:32:22.771Z") and timestamp < datetime("2025-08-20T22:32:22.771Z")
+| where * has "/store/checkout"
+| order by timestamp desc
+| take 100
+
+union isfuzzy=true exceptions
+| where timestamp > datetime("2025-07-21T22:32:22.771Z") and timestamp < datetime("2025-08-20T22:32:22.771Z")
+| where * has "/store/checkout"
+| extend day = startofday(timestamp)
+| summarize problemedCount = count() by day
+| order by day desc
