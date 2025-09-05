@@ -6,14 +6,18 @@
 #   3. Change directory to the script folder:
 #      CD C:\Scripts (wherever your script is)
 #   4. In powershell, run script: 
-#      .\Get-AuthorizationToken.ps1 -TenantId "00000000-85ea-42d2-b7b3-30ef2666c7ab" -ClientId "00000000-9f24-40c0-87b8-69bdd5ae60a3" -ClientSecret "SECRET HERE" -Scope "00000000-4ae8-43f7-8c1f-71b3a340d4fd"
+#      .\Get-AuthorizationToken.ps1 
+#           -TenantId "00000000-85ea-42d2-b7b3-30ef2666c7ab" 
+#           -ClientId "00000000-9f24-40c0-87b8-69bdd5ae60a3" 
+#           -ClientSecret "SECRET HERE" 
+#           -Scope "api://00000000-4ae8-43f7-8c1f-71b3a340d4fd/.default" or "Editor, Viewer"
 ####################################################################################
 
 param (
     [string]$TenantId = $(throw '-TenantId is a required parameter.'),
     [string]$ClientId = $(throw '-ClientId is a required parameter.'),
     [string]$ClientSecret = $(throw '-ClientSecret is a required parameter.'),
-    [string]$ScopeClientId = $(throw '-ScopeClientId is a required parameter.')
+    [string]$Scope = $(throw '-Scope is a required parameter.')
 )
 
 ####################################################################################
@@ -27,13 +31,16 @@ Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
 
-Invoke-RestMethod -Uri "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token" `
+$tokenResponse = Invoke-RestMethod -Uri "https://login.microsoftonline.com/$TenantId/oauth2/v2.0/token" `
     -Method Post `
     -ContentType "application/x-www-form-urlencoded" `
     -Headers @{"Cookie" = "stsservicecookie=estsfd; x-ms-gateway-slice=estsfd" } `
     -Body @{
-    grant_type    = "client_credentials"
-    client_id     = $ClientId
-    client_secret = $ClientSecret
-    scope         = "api://$ScopeClientId/.default"
-}
+        grant_type    = "client_credentials"
+        client_id     = $ClientId
+        client_secret = $ClientSecret
+        scope         = $Scope
+    }
+
+$accessToken = $tokenResponse.access_token
+Write-Output $accessToken
