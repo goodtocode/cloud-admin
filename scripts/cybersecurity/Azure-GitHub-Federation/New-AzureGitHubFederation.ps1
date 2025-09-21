@@ -6,8 +6,7 @@
 #   3. Change directory to the script folder:
 #      CD C:\Scripts (wherever your script is)
 #   4. In powershell, run script: 
-#      .\New-AzureGitHubFederation.ps1 -SubscriptionId 12343dac-0e69-436a-866b-456727dd3579 
-#           -PrincipalName myco-github-devtest-001 -Organization mygithuborg -Repository mygithubrepo -Environment development
+#      .\New-AzureGitHubFederation.ps1 -SubscriptionId 12343dac-0e69-436a-866b-456727dd3579 -PrincipalName myco-github-devtest-001 -Organization mygithuborg -Repository mygithubrepo -Environment development
 ####################################################################################
 
 param (
@@ -33,30 +32,38 @@ Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
 # Install required modules
-Install-Module Az #-Force #Force will update the module if it is already installed
+Install-Module Az.Accounts,Az.Resources -Scope CurrentUser -Force
 
 # Login to Azure
 Connect-AzAccount -SubscriptionId $SubscriptionId -UseDeviceAuthentication
 
-# Create a new Azure AD App Registration application and service principal
-$existingAppRegistration = Get-AzADApplication -Filter "displayName eq '$PrincipalName'"
-if (-not $existingAppRegistration) {
-    New-AzADApplication -DisplayName $PrincipalName
+# Get App Registration object (Application object)
+$app = Get-AzADApplication -DisplayName $PrincipalName
+if (-not $app) {
+    $app = New-AzADApplication -DisplayName $PrincipalName
 }
-$clientId = (Get-AzADApplication -DisplayName $PrincipalName).AppId
-New-AzADServicePrincipal -ApplicationId $clientId
-$objectId = (Get-AzADServicePrincipal -DisplayName $PrincipalName).Id
-New-AzRoleAssignment -ObjectId $objectId -RoleDefinitionName Contributor -Scope "/subscriptions/$SubscriptionId"
-$clientId = (Get-AzADApplication -DisplayName $PrincipalName).AppId
+Write-Host "App Registration (Client) Id: $($app.AppId)"
+$clientId = $app.AppId
+$appObjectId = $app.Id
+
+# Create Service Principal and assign role
+$sp = Get-AzADServicePrincipal -DisplayName $PrincipalName
+if (-not $sp) {
+    $sp = New-AzADServicePrincipal -ApplicationId $clientId
+}
+Write-Host "Service Principal Id: $($sp.Id)"
+$spObjectId = $sp.Id
+New-AzRoleAssignment -ObjectId $spObjectId -RoleDefinitionName Contributor -Scope "/subscriptions/$SubscriptionId"
+
 $tenantId = (Get-AzContext).Subscription.TenantId
 
 # Create new App Registration Federated Credentials for the GitHub operations
-$subjectRepo = $subjectRepo = "repo:" + $Organization + "/" + $Repository + ":environment:" + $Environment
-New-AzADAppFederatedCredential -ApplicationObjectId $objectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com' -Name "$PrincipalName-repo" -Subject "$subjectRepo"
+$subjectRepo = "repo:" + $Organization + "/" + $Repository + ":environment:" + $Environment
+New-AzADAppFederatedCredential -ApplicationObjectId $appObjectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com' -Name "$PrincipalName-repo" -Subject "$subjectRepo"
 $subjectRepoMain = "repo:" + $Organization + "/" + $Repository + ":ref:refs/heads/main"
-New-AzADAppFederatedCredential -ApplicationObjectId $objectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com' -Name "$PrincipalName-main" -Subject "$subjectRepoMain"
+New-AzADAppFederatedCredential -ApplicationObjectId $appObjectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com' -Name "$PrincipalName-main" -Subject "$subjectRepoMain"
 $subjectRepoPR = "repo:" + $Organization + "/" + $Repository + ":pull_request"
-New-AzADAppFederatedCredential -ApplicationObjectId $objectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com' -Name "$PrincipalName-PR" -Subject "$subjectRepoPR"
+New-AzADAppFederatedCredential -ApplicationObjectId $appObjectId -Audience api://AzureADTokenExchange -Issuer 'https://token.actions.githubusercontent.com' -Name "$PrincipalName-PR" -Subject "$subjectRepoPR"
 
 Write-Host "AZURE_TENANT_ID: $tenantId"
 Write-Host "AZURE_SUBSCRIPTION_ID: $SubscriptionId"
