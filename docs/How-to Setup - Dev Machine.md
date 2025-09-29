@@ -36,6 +36,12 @@ git config --global user.email "you@example.com"
 git config --global user.name "Your Name"
 ```
 
+### GitHub CLI (gh)
+```
+winget install --id GitHub.cli --silent
+```
+
+
 ## IDEs and Editors
 ### Visual Studio
 [Visual Studio Workload IDs](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022&preserve-view=true)
