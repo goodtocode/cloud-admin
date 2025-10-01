@@ -69,6 +69,12 @@ Add C# DevKit to VS Code
 ```
 code --install-extension ms-dotnettools.csharp
 ```
+Add Notebook to VS Code
+Polyglot (.dib) no python needed
+```
+dotnet tool install -g Microsoft.dotnet-interactive
+dotnet interactive jupyter install
+```
 
 ### Paint.NET
 ```
