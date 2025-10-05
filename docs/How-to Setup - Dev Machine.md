@@ -75,6 +75,10 @@ Polyglot (.dib) no python needed
 dotnet tool install -g Microsoft.dotnet-interactive
 dotnet interactive jupyter install
 ```
+Add Kusto KQL and Log Analytics Workspace
+```
+code --install-extension donjayamanne.kusto
+```
 
 ### Paint.NET
 ```
