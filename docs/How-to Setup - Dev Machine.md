@@ -19,6 +19,11 @@ winget install --id Microsoft.PowerShell --silent
 winget install --id Microsoft.PowerToys --source winget
 ```
 
+### Windows Subsystem for Linux (wsl)
+```
+wsl --install
+```
+
 ### Smartbear SoapUI API Testing
 ```
 winget install --id Smartbear.SoapUI --source winget
