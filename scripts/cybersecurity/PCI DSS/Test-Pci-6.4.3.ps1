@@ -1,8 +1,16 @@
+
 #-----------------------------------------------------------------------
-# Test-Pci-6.4.3 [TargetUrl [<String>]]
+# Test-Pci-6.4.3 [TargetUrl <String>]
 #
-# Example: .\Test-Pci-6.4.3.ps1 -TargetUrl "www.example.com"
+# Example: .\Test-Pci-6.4.3.ps1 -TargetUrl "https://www.example.com"
+#
+# This script tests PCI DSS v4.0 compliance for:
+# - 6.4.3.1: Inventory of scripts
+# - 6.4.3.2: Authorization of scripts (manual follow-up suggested)
+# - 6.4.3.3: Integrity verification of scripts
+# - 4.30: CGI Generic XSS (parameter name reflection, error leakage)
 #-----------------------------------------------------------------------
+
 # ---
 # --- Parameters
 # ---
@@ -31,6 +39,7 @@ function Test-PciDss643 {
     
     Add-Type -AssemblyName System.Web
 
+    # --- PCI DSS 4.30: Malicious parameter injection test ---
     $maliciousParam = '<<<<<<foo"bar''314>>>>>=1'
     $encodedParam = [System.Web.HttpUtility]::UrlEncode($maliciousParam)
     $testUrl = "$Url" + "?" + $encodedParam
@@ -106,44 +115,48 @@ function Test-PciDss643 {
         if ($integrityResults.Count -eq 0) {
             Write-Warning "⚠️ No script tags found for integrity check."
         }
-    } catch {
+    }
+    catch {
         Write-Error "❌ Error checking script integrity: $_"
     }
 
-    # Check for reflected input
+    #--- PCI DSS 4.30: Reflected Input (XSS) ---
     try {
         if ($response.Content -match [Regex]::Escape($maliciousParam)) {
-            Write-Warning "⚠️ Potential XSS: Malicious parameter reflected in response."
+            Write-Warning "⚠️ PCI DSS 4.30: Malicious parameter reflected in response (XSS risk)."
         }
         else {
-            Write-Host "✅ No reflection detected."
+            Write-Host "✅ PCI DSS 4.30: No reflected input detected."
         }
+
     }
     catch {
         Write-Error "❌ Error checking for reflected input: $_"
     }
 
-    # Check for error leakage
+    #--- PCI DSS 4.30: Error Leakage ---
     try {
         if ($response.Content -match "Exception" -or $response.Content -match "Request.RawUrl") {
-            Write-Warning "⚠️ Potential error leakage detected in response."
+
+            Write-Warning "⚠️ PCI DSS 4.30: Potential error leakage detected in response."
         }
         else {
-            Write-Host "✅ No error leakage detected."
+            Write-Host "✅ PCI DSS 4.30: No error leakage detected."
         }
     }
     catch {
         Write-Error "❌ Error checking for error leakage: $_"
     }
 
-    # Check for CSP header
+    # --- PCI DSS 6.4.3.2: Script Authorization (Indirect) ---
     try {
         if ($response.Headers["Content-Security-Policy"]) {
-            Write-Host "✅ CSP header found: $($response.Headers["Content-Security-Policy"])"
+            Write-Host "✅ PCI DSS 6.4.3.2: CSP header found — supports script authorization."
         }
         else {
-            Write-Warning "⚠️ Missing Content-Security-Policy header."
+            Write-Warning "⚠️ PCI DSS 6.4.3.2: Missing Content-Security-Policy header — script authorization not enforced."
         }
+
     }
     catch {
         Write-Error "❌ Error checking for CSP header: $_"
