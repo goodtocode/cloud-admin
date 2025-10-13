@@ -1,7 +1,7 @@
 #-----------------------------------------------------------------------
-# Test-Pci430 [TargetUrl [<String>]]
+# Test-Pci-6.4.3 [TargetUrl [<String>]]
 #
-# Example: .\Test-Pci430.ps1 -TargetUrl "www.example.com"
+# Example: .\Test-Pci-6.4.3.ps1 -TargetUrl "www.example.com"
 #-----------------------------------------------------------------------
 # ---
 # --- Parameters
@@ -23,7 +23,7 @@ Write-Host "---------------------------"
 Write-Host "--- Starting: $ThisScript on $Now"
 Write-Host "---------------------------"
 
-function Test-PciDss430 {
+function Test-PciDss643 {
     param (
         [string]$Url
     )
@@ -84,4 +84,4 @@ function Test-PciDss430 {
     }
 }
 
-Test-PciDss430 -Url $TargetUrl
+Test-PciDss643 -Url $TargetUrl
