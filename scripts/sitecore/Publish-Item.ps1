@@ -24,11 +24,31 @@ Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
 
-foreach ($path in $Paths) {
+$targetDatabase = "web"
+
+$publishWithChildrenPaths = @(
+    "/sitecore/templates/My/Content/Pages/Blog",
+    "/sitecore/templates/My/Content/Auxiliary/Blog Author"
+)
+
+$publishWithoutChildrenPaths = @(
+    "/sitecore/content/My Website/Shared/People"
+)
+
+foreach ($path in $publishWithChildrenPaths) {
     $item = Get-Item -Path $path
     if ($null -ne $item) {
-        Publish-Item -Item $item -Target $DatabaseName -PublishMode Smart -Recurse
-        Write-Host "Item published: $path"
+        Publish-Item -Item $item -Target $targetDatabase -PublishMode Smart -Recurse
+    }
+    else {
+        Write-Host "Item not found at path: $path"
+    }
+}
+
+foreach ($path in $publishWithoutChildrenPaths) {
+    $item = Get-Item -Path $path
+    if ($null -ne $item) {
+        Publish-Item -Item $item -Target $targetDatabase -PublishMode Smart -Recurse:$false
     }
     else {
         Write-Host "Item not found at path: $path"
