@@ -54,20 +54,38 @@ wsl --install
 Write-Host "Installing Azure tooling..." -ForegroundColor Yellow
 winget install Microsoft.AzureCLI --silent
 winget install -e --id Microsoft.Bicep --silent
+
 # .NET Developer Experience
 Write-Host "Installing .NET developer experience..." -ForegroundColor Yellow
 winget install --id Microsoft.DotNet.SDK.9 --silent
-
 dotnet tool install --global dotnet-ef
+
 winget install --id Microsoft.VisualStudio.2022.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
 
 winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
 code --install-extension ms-dotnettools.csharp
-dotnet tool install -g Microsoft.dotnet-interactive
-dotnet interactive jupyter install
+code --install-extension ms-dotnettools.vscodeintellicode-csharp
+code --install-extension ms-dotnettools.dotnet-interactive-vscode
+code --install-extension donjayamanne.kusto
+code --install-extension ms-vscode.hexeditor
+code --install-extension ms-vscode.powershell
+code --install-extension ms-vscode.copilot-mermaid-diagram
+code --install-extension ms-vscode-remote.remote-wsl
+code --install-extension redhat.vscode-xml
+code --install-extension redhat.vscode-yaml
+code --install-extension moshfeu.compare-folders
+code --install-extension ms-azuretools.vscode-azureresourcegroups
+code --install-extension ms-azuretools.vscode-azure-github-copilot
+code --install-extension GitHub.copilot
+code --install-extension GitHub.copilot-chat
+code --install-extension ms-windows-ai-studio.windows-ai-studio
+code --install-extension TeamsDevApp.vscode-ai-foundry
+code --install-extension ms-mssql.mssql
+code --install-extension ms-mssql.sql-database-projects-vscode
+code --install-extension DBCode.dbcode
+code --install-extension microsoft-IsvExpTools.powerplatform-vscode
 
 winget install Microsoft.SQLServer.2022.Developer -e --override "/Q /IACCEPTSQLSERVERLICENSETERMS /ACTION=Install /FEATURES=SQLENGINE /INSTANCENAME=SQLEXPRESS /ENU"
-
 winget install Microsoft.Azure.FunctionsCoreTools --silent
 
 # Optional installations
