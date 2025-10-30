@@ -74,15 +74,48 @@ Add C# DevKit to VS Code
 ```
 code --install-extension ms-dotnettools.csharp
 ```
+IntelliCode for C#
+```
+code --install-extension ms-dotnettools.vscodeintellicode-csharp
+```
 Add Notebook to VS Code
 Polyglot (.dib) no python needed
 ```
-dotnet tool install -g Microsoft.dotnet-interactive
-dotnet interactive jupyter install
+code --install-extension ms-dotnettools.dotnet-interactive-vscode
 ```
 Add Kusto KQL and Log Analytics Workspace
 ```
 code --install-extension donjayamanne.kusto
+```
+
+### General VS Code Extensions
+Hex Editor
+```
+code --install-extension ms-vscode.hexeditor
+```
+PowerShell Extension
+```
+code --install-extension ms-vscode.powershell
+```
+Mermaid Diagram Extension
+```
+code --install-extension ms-vscode.copilot-mermaid-diagram
+```
+Remote WSL Extension
+```
+code --install-extension ms-vscode-remote.remote-wsl
+```
+XML Extension
+```
+code --install-extension redhat.vscode-xml
+```
+YAML Extension
+```
+code --install-extension redhat.vscode-yaml
+```
+Compare Folders Extension
+```
+code --install-extension moshfeu.compare-folders
 ```
 
 ### Paint.NET
@@ -107,6 +140,11 @@ dotnet add package Microsoft.EntityFrameworkCore.Design
 ```
 
 ## Azure Development
+### Azure Management
+```
+code --install-extension ms-azuretools.vscode-azureresourcegroups
+code --install-extension ms-azuretools.vscode-azure-github-copilot
+```
 ### Azure CLI
 ```
 winget install Microsoft.AzureCLI --silent
@@ -129,12 +167,35 @@ func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass
 npm install -g azurite
 ```
 
+## AI Development
+### GitHub Copilot Extension
+```
+code --install-extension GitHub.copilot
+```
+### GitHub Copilot Chat Extension
+```
+code --install-extension GitHub.copilot-chat
+```
+### Windows AI Studio Extension
+```
+code --install-extension ms-windows-ai-studio.windows-ai-studio
+```
+### Teams AI Foundry Extension
+```
+code --install-extension TeamsDevApp.vscode-ai-foundry
+```
+
 ## Database Development
 ### SQL Server 2022  Developer Edition
 Visual Studio installs SQL Express. If you want full-featured SQL Server, install the SQL Server Developer Edition or above.
 [SQL Server Developer Edition or above](https://www.microsoft.com/en-us/sql-server/sql-server-downloads)
 ```
 winget install Microsoft.SQLServer.2022.Developer -e --override "/Q /IACCEPTSQLSERVERLICENSETERMS /ACTION=Install /FEATURES=SQLENGINE /INSTANCENAME=SQLEXPRESS /ENU"
+```
+Add Sql Server Management to VS Code
+```
+code --install-extension ms-mssql.mssql
+code --install-extension ms-mssql.sql-database-projects-vscode
 ```
 
 ### Database Queries/ERD
