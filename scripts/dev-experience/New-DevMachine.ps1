@@ -136,8 +136,7 @@ $extensions = @(
     "TeamsDevApp.vscode-ai-foundry",
     "ms-mssql.mssql",
     "ms-mssql.sql-database-projects-vscode",
-    "DBCode.dbcode",
-    "microsoft-IsvExpTools.powerplatform-vscode"
+    "DBCode.dbcode"
 )
 foreach ($ext in $extensions) {
     if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
