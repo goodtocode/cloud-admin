@@ -25,8 +25,8 @@ param(
 )
 
 # Convention-driven variable names
-$ProfileName     = "afd-platform-hub-westus2-001" # You may want to make region a parameter if needed
-$EndpointName    = "afdend-$Environment"
+$ProfileName     = "afd-platform-hub-westus2-001"
+$EndpointName    = "afdend-$ProductName-$Environment"
 $OriginGroupName = "afdpool-$ProductName-$Environment"
 $OriginName      = "afdorigin-$ProductName-$Environment"
 $RouteName       = "afdroute-$ProductName-$Environment"
