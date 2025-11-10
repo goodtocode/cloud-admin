@@ -1,14 +1,19 @@
-
-
 # =======================================================================
 # New-AfdAppService.ps1
 #
 # Example:
-#   .\New-AfdAppService.ps1 -ResourceGroup "my-rg" -ProfileName "afd-profile" -EndpointName "afd-endpoint" -OriginGroupName "afd-origin-group" -OriginName "afd-origin" -RouteName "afd-route" -AppServiceHost "myapp.azurewebsites.net"
+#   .\New-AfdAppService.ps1 -ResourceGroup "my-rg" -ProductName "myproduct" -AppServiceHost "myapp.azurewebsites.net" -TenantId "00000000-0000-0000-0000-000000000000" -Environment "dev"
+#
+# Parameters:
+#   -ResourceGroup   : Name of the Azure resource group (required)
+#   -ProductName     : Short name for the product or application (required)
+#   -AppServiceHost  : Hostname of the Azure App Service (required)
+#   -TenantId        : Azure AD Tenant ID (required for login context)
+#   -Environment     : Environment name (e.g., dev, test, prod). Default is 'dev'.
 #
 # Description:
 #   This script automates the creation and configuration of an Azure Front Door (AFD) Standard profile, endpoint, origin group, origin, and route for an Azure App Service.
-#   It ensures all resources exist, creating them if necessary, and outputs the default FQDN for the endpoint.
+#   Resource names are convention-driven based on ProductName and Environment. All resources are created if they do not exist. The script outputs the default FQDN for the endpoint.
 # =======================================================================
 
 param(
@@ -23,8 +28,8 @@ param(
 $ProfileName     = "afd-platform-hub-westus2-001" # You may want to make region a parameter if needed
 $EndpointName    = "afdend-$Environment"
 $OriginGroupName = "afdpool-$ProductName-$Environment"
-$OriginName      = "afd-origin-$ProductName-$Environment"
-$RouteName       = "$ProductName-$Environment-route"
+$OriginName      = "afdorigin-$ProductName-$Environment"
+$RouteName       = "afdroute-$ProductName-$Environment"
 
 ###############################################################
 # Initialize
@@ -78,38 +83,43 @@ if (-not $profile) {
     Write-Host "Profile exists: $ProfileName"
 }
 
+
 # Endpoint
-$endpoint = Get-AzFrontDoorCdnEndpoint -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $EndpointName -ErrorAction SilentlyContinue
+$endpoint = Get-AzFrontDoorCdnEndpoint -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -EndpointName $EndpointName -ErrorAction SilentlyContinue
 if (-not $endpoint) {
     Write-Host "Creating Endpoint: $EndpointName"
     $endpoint = New-AzFrontDoorCdnEndpoint -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-        -Name $EndpointName -EnabledState "Enabled"
+        -EndpointName $EndpointName -Location "Global" -EnabledState "Enabled"
 } else {
     Write-Host "Endpoint exists: $EndpointName"
 }
 
+
 # Origin Group
-$originGroup = Get-AzFrontDoorCdnOriginGroup -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $OriginGroupName -ErrorAction SilentlyContinue
+$originGroup = Get-AzFrontDoorCdnOriginGroup -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -OriginGroupName $OriginGroupName -ErrorAction SilentlyContinue
 if (-not $originGroup) {
     Write-Host "Creating Origin Group: $OriginGroupName"
+    $healthProbeSetting = New-AzFrontDoorCdnOriginGroupHealthProbeSettingObject -ProbeIntervalInSecond 100 -ProbePath "/" -ProbeProtocol "Https" -ProbeRequestType "HEAD"
+    $loadBalancingSetting = New-AzFrontDoorCdnOriginGroupLoadBalancingSettingObject -AdditionalLatencyInMillisecond 50 -SampleSize 4 -SuccessfulSamplesRequired 3
     $originGroup = New-AzFrontDoorCdnOriginGroup -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-        -Name $OriginGroupName -ProbePath "/" -ProbeProtocol "Https" -ProbeRequestType "HEAD" `
-        -ProbeIntervalInSeconds 100 -SampleSize 4 -SuccessfulSamplesRequired 3 -AdditionalLatencyInMilliseconds 50
+        -OriginGroupName $OriginGroupName -HealthProbeSetting $healthProbeSetting -LoadBalancingSetting $loadBalancingSetting
 } else {
     Write-Host "Origin Group exists: $OriginGroupName"
 }
 
+
 # Origin
 $origin = Get-AzFrontDoorCdnOrigin -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-    -OriginGroupName $OriginGroupName -Name $OriginName -ErrorAction SilentlyContinue
+    -OriginGroupName $OriginGroupName -OriginName $OriginName -ErrorAction SilentlyContinue
 if (-not $origin) {
     Write-Host "Creating Origin: $OriginName"
     $origin = New-AzFrontDoorCdnOrigin -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-        -OriginGroupName $OriginGroupName -Name $OriginName -HostName $AppServiceHost `
+        -OriginGroupName $OriginGroupName -OriginName $OriginName -HostName $AppServiceHost `
         -OriginHostHeader $AppServiceHost -HttpPort 80 -HttpsPort 443 -EnabledState "Enabled"
 } else {
     Write-Host "Origin exists: $OriginName"
 }
+
 
 # Route
 $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
@@ -118,8 +128,9 @@ if (-not $route) {
     Write-Host "Creating Route: $RouteName"
     $route = New-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -EndpointName $EndpointName -Name $RouteName -OriginGroupId $originGroup.Id `
-        -PatternsToMatch "/*" -SupportedProtocols @("Http","Https") `
-        -ForwardingProtocol "MatchRequest" -HttpsRedirect "Enabled" -EnabledState "Enabled"
+        -PatternsToMatch "/*" -SupportedProtocol @("Http","Https") `
+        -ForwardingProtocol "MatchRequest" -HttpsRedirect "Enabled" -EnabledState "Enabled" `
+        -LinkToDefaultDomain "Enabled"
 } else {
     Write-Host "Route exists: $RouteName"
 }
