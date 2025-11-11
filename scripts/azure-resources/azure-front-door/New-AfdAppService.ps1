@@ -9,6 +9,7 @@
 #   -ProductName     : Short name for the product or application (required)
 #   -AppServiceHost  : Hostname of the Azure App Service (required)
 #   -TenantId        : Azure AD Tenant ID (required for login context)
+#   -ExternalDns     : External DNS name that will form the endopoint FQDN (required) I.e. www.myapp.com
 #   -Environment     : Environment name (e.g., dev, test, prod). Default is 'dev'.
 #
 # Description:
@@ -21,15 +22,25 @@ param(
     [string]$ProductName,    
     [string]$AppServiceHost,
     [guid]$TenantId,
-    [string]$Environment = "dev"
+    [string]$ExternalDns,
+    [string]$Environment = "dev",
+    [string]$RoutePath = ""
 )
 
 # Convention-driven variable names
+$ExternalDnsAlpha = $ExternalDns -replace "[^a-zA-Z]", ""
 $ProfileName     = "afd-platform-hub-westus2-001"
-$EndpointName    = "afdend-$ProductName-$Environment"
-$OriginGroupName = "afdpool-$ProductName-$Environment"
+$EndpointName    = "afdend-$ExternalDnsAlpha-$Environment"
+$OriginGroupName = "afdpool-$ExternalDnsAlpha-$Environment"
 $OriginName      = "afdorigin-$ProductName-$Environment"
-$RouteName       = "afdroute-$ProductName-$Environment"
+# Set default RouteName if not provided
+if ([string]::IsNullOrWhiteSpace($RouteName)) {
+    $RouteName = "afdroute-$ProductName-$Environment"
+}
+# Set default RoutePath if not provided
+if ([string]::IsNullOrWhiteSpace($RoutePath)) {
+    $RoutePath = $ProductName
+}
 
 ###############################################################
 # Initialize
@@ -83,7 +94,6 @@ if (-not $profile) {
     Write-Host "Profile exists: $ProfileName"
 }
 
-
 # Endpoint
 $endpoint = Get-AzFrontDoorCdnEndpoint -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -EndpointName $EndpointName -ErrorAction SilentlyContinue
 if (-not $endpoint) {
@@ -93,7 +103,6 @@ if (-not $endpoint) {
 } else {
     Write-Host "Endpoint exists: $EndpointName"
 }
-
 
 # Origin Group
 $originGroup = Get-AzFrontDoorCdnOriginGroup -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -OriginGroupName $OriginGroupName -ErrorAction SilentlyContinue
@@ -107,7 +116,6 @@ if (-not $originGroup) {
     Write-Host "Origin Group exists: $OriginGroupName"
 }
 
-
 # Origin
 $origin = Get-AzFrontDoorCdnOrigin -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
     -OriginGroupName $OriginGroupName -OriginName $OriginName -ErrorAction SilentlyContinue
@@ -120,20 +128,20 @@ if (-not $origin) {
     Write-Host "Origin exists: $OriginName"
 }
 
-
 # Route
 $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
     -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
 if (-not $route) {
-    Write-Host "Creating Route: $RouteName"
+    Write-Host "Creating Route: $RouteName with pattern: $RoutePattern"
     $route = New-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -EndpointName $EndpointName -Name $RouteName -OriginGroupId $originGroup.Id `
-        -PatternsToMatch "/*" -SupportedProtocol @("Http","Https") `
-        -ForwardingProtocol "MatchRequest" -HttpsRedirect "Enabled" -EnabledState "Enabled" `
+        -PatternsToMatch "/$RoutePath/*" `
+        -ForwardingProtocol "MatchRequest" `
+        -HttpsRedirect "Enabled" `
+        -EnabledState "Enabled" `
         -LinkToDefaultDomain "Enabled"
 } else {
     Write-Host "Route exists: $RouteName"
 }
-
 
 Write-Host "Setup complete. Default FQDN: https://$EndpointName.$ProfileName.azurefd.net"
