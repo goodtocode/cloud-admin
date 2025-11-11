@@ -1,21 +1,28 @@
-# =======================================================================
-# New-AfdAppService.ps1
-#
-# Example:
-#   .\New-AfdAppService.ps1 -ResourceGroup "my-rg" -ProductName "myproduct" -AppServiceHost "myapp.azurewebsites.net" -TenantId "00000000-0000-0000-0000-000000000000" -Environment "dev"
-#
-# Parameters:
-#   -ResourceGroup   : Name of the Azure resource group (required)
-#   -ProductName     : Short name for the product or application (required)
-#   -AppServiceHost  : Hostname of the Azure App Service (required)
-#   -TenantId        : Azure AD Tenant ID (required for login context)
-#   -ExternalDns     : External DNS name that will form the endopoint FQDN (required) I.e. www.myapp.com
-#   -Environment     : Environment name (e.g., dev, test, prod). Default is 'dev'.
-#
-# Description:
-#   This script automates the creation and configuration of an Azure Front Door (AFD) Standard profile, endpoint, origin group, origin, and route for an Azure App Service.
-#   Resource names are convention-driven based on ProductName and Environment. All resources are created if they do not exist. The script outputs the default FQDN for the endpoint.
-# =======================================================================
+<#
+.SYNOPSIS
+Creates and configures an Azure Front Door App Service for a specified set of parameters.
+.DESCRIPTION
+This script automates the creation and configuration of an Azure Front Door (AFD) Standard profile, endpoint, origin group, origin, and route for an Azure App Service. It accepts parameters to specify the resource group, product name, app service host, tenant ID, external DNS, environment, and route path. Resource names are convention-driven based on ProductName and Environment. All resources are created if they do not exist. The script outputs the default FQDN for the endpoint.
+.PARAMETER ResourceGroup
+Name of the Azure resource group (required).
+.PARAMETER ProductName
+Short name for the product or application (required).
+.PARAMETER AppServiceHost
+Hostname of the Azure App Service (required).
+.PARAMETER TenantId
+Azure AD Tenant ID (required for login context).
+.PARAMETER ExternalDns
+External DNS name that will form the endpoint FQDN (required), e.g., www.myapp.com.
+.PARAMETER Environment
+Environment name (e.g., dev, test, prod). Default is 'dev'.
+.PARAMETER RoutePath
+Route path for the Front Door route. Default is ProductName.
+.EXAMPLE
+PS> .\New-AfdAppService.ps1 -ResourceGroup "my-rg" -ProductName "myproduct" -AppServiceHost "myapp.azurewebsites.net" -TenantId "00000000-0000-0000-0000-000000000000" -ExternalDns "www.myapp.com" -Environment "dev"
+This will create and configure an Azure Front Door App Service for the specified parameters.
+.NOTES
+Author: GoodToCode
+#>
 
 param(
     [string]$ResourceGroup,
@@ -85,10 +92,10 @@ if (-not (Get-AzResourceGroup -Name $ResourceGroup -ErrorAction SilentlyContinue
 }
 
 # Front Door Profile
-$profile = Get-AzFrontDoorCdnProfile -ResourceGroupName $ResourceGroup -Name $ProfileName -ErrorAction SilentlyContinue
-if (-not $profile) {
+$cdnProfile = Get-AzFrontDoorCdnProfile -ResourceGroupName $ResourceGroup -Name $ProfileName -ErrorAction SilentlyContinue
+if (-not $cdnProfile) {
     Write-Host "Creating AFD Profile: $ProfileName"
-    $profile = New-AzFrontDoorCdnProfile -ResourceGroupName $ResourceGroup -Name $ProfileName `
+    $cdnProfile = New-AzFrontDoorCdnProfile -ResourceGroupName $ResourceGroup -Name $ProfileName `
         -SkuName "Standard_AzureFrontDoor" -Location "Global"
 } else {
     Write-Host "Profile exists: $ProfileName"
@@ -108,7 +115,7 @@ if (-not $endpoint) {
 $originGroup = Get-AzFrontDoorCdnOriginGroup -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -OriginGroupName $OriginGroupName -ErrorAction SilentlyContinue
 if (-not $originGroup) {
     Write-Host "Creating Origin Group: $OriginGroupName"
-    $healthProbeSetting = New-AzFrontDoorCdnOriginGroupHealthProbeSettingObject -ProbeIntervalInSecond 100 -ProbePath "/" -ProbeProtocol "Https" -ProbeRequestType "HEAD"
+    $healthProbeSetting = New-AzFrontDoorCdnOriginGroupHealthProbeSettingObject -ProbeIntervalInSecond 100 -ProbePath "/" -ProbeProtocol "Https" -ProbeRequestType "GET"
     $loadBalancingSetting = New-AzFrontDoorCdnOriginGroupLoadBalancingSettingObject -AdditionalLatencyInMillisecond 50 -SampleSize 4 -SuccessfulSamplesRequired 3
     $originGroup = New-AzFrontDoorCdnOriginGroup -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -OriginGroupName $OriginGroupName -HealthProbeSetting $healthProbeSetting -LoadBalancingSetting $loadBalancingSetting

@@ -1,32 +1,41 @@
-# =======================================================================
-# Remove-AfdAppService.ps1
-#
-# Example:
-#   .\Remove-AfdAppService.ps1 -ResourceGroup "my-rg" -ProductName "myproduct" -TenantId "00000000-0000-0000-0000-000000000000" -Environment "dev"
-#
-# Parameters:
-#   -ResourceGroup   : Name of the Azure resource group (required)
-#   -ProductName     : Short name for the product or application (required)
-#   -TenantId        : Azure AD Tenant ID (required for login context)
-#   -Environment     : Environment name (e.g., dev, test, prod). Default is 'dev'.
-#
-# Description:
-#   This script removes the Azure Front Door endpoint, origin group, origin, and route for a given product/environment.
-#   It does NOT delete the AFD profile.
-# =======================================================================
+<#!
+.SYNOPSIS
+Removes Azure Front Door resources for a given product and environment.
+.DESCRIPTION
+Removes the Azure Front Door endpoint, origin group, origin, and route for the specified product and environment. Does not delete the AFD profile.
+.PARAMETER ResourceGroup
+Name of the Azure resource group (required).
+.PARAMETER ProductName
+Short name for the product or application (required).
+.PARAMETER TenantId
+Azure AD Tenant ID (required for login context).
+.PARAMETER Environment
+Environment name (e.g., dev, test, prod). Default is 'dev'.
+.EXAMPLE
+PS> .\Remove-AfdAppService.ps1 -ResourceGroup "my-rg" -ProductName "myproduct" -TenantId "00000000-0000-0000-0000-000000000000" -Environment "dev"
+Removes the Azure Front Door resources for the specified parameters.
+.NOTES
+Author: GoodToCode
+#>
 param(
     [string]$ResourceGroup,
     [string]$ProductName,
     [guid]$TenantId,
-    [string]$Environment = "dev"
+    [string]$ExternalDns,
+    [string]$Environment = "dev",
+    [string]$RoutePath = ""
 )
 
-# Convention-driven names
+# Convention-driven variable names
+$ExternalDnsAlpha = $ExternalDns -replace "[^a-zA-Z]", ""
 $ProfileName     = "afd-platform-hub-westus2-001"
-$EndpointName    = "afdend-$ProductName-$Environment"
-$OriginGroupName = "afdpool-$ProductName-$Environment"
+$EndpointName    = "afdend-$ExternalDnsAlpha-$Environment"
+$OriginGroupName = "afdpool-$ExternalDnsAlpha-$Environment"
 $OriginName      = "afdorigin-$ProductName-$Environment"
-$RouteName       = "afdroute-$ProductName-$Environment"
+# Set default RouteName if not provided
+if ([string]::IsNullOrWhiteSpace($RouteName)) {
+    $RouteName = "afdroute-$ProductName-$Environment"
+}
 
 ###############################################################
 # Initialize
