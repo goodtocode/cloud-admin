@@ -142,7 +142,7 @@ if (-not $route) {
     Write-Host "Creating Route: $RouteName with pattern: $RoutePattern"
     $route = New-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -EndpointName $EndpointName -Name $RouteName -OriginGroupId $originGroup.Id `
-        -PatternsToMatch "/$RoutePath/*" `
+        -PatternsToMatch @("/$RoutePath/*", "/$RoutePath") `
         -ForwardingProtocol "MatchRequest" `
         -HttpsRedirect "Enabled" `
         -EnabledState "Enabled" `
