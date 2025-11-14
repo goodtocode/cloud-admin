@@ -135,6 +135,28 @@ if (-not $origin) {
     Write-Host "Origin exists: $OriginName"
 }
 
+# Ruleset
+$rulesetName = "RewriteToRoot"
+$ruleset = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName -ErrorAction SilentlyContinue
+if (-not $ruleset) {
+    Write-Host "Creating Ruleset: $rulesetName"
+    $ruleset = New-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName
+} else {
+    Write-Host "Ruleset exists: $rulesetName"
+}
+
+# Rule
+$ruleName = "RewritePathToRoot"
+$rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
+if (-not $rule) {
+    Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
+    $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject -ParameterTypeName "UrlPath" -ParameterOperator "Any"
+    $action = New-AzFrontDoorCdnRuleUrlRewriteActionObject -ParameterTypeName "UrlRewrite" -ParameterSourcePattern "/.*" -ParameterDestination "/"
+    $rule = New-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -Order 1 -Condition $matchCondition -Action $action
+} else {
+    Write-Host "Rule exists: $ruleName in Ruleset: $rulesetName"
+}
+
 # Route
 $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
     -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
@@ -143,6 +165,7 @@ if (-not $route) {
     $route = New-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -EndpointName $EndpointName -Name $RouteName -OriginGroupId $originGroup.Id `
         -PatternsToMatch @("/$RoutePath/*", "/$RoutePath") `
+        -RuleSet @($ruleset.Id) `
         -ForwardingProtocol "MatchRequest" `
         -HttpsRedirect "Enabled" `
         -EnabledState "Enabled" `
