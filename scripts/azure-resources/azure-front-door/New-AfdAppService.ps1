@@ -26,11 +26,11 @@ Author: GoodToCode
 
 param(
     [string]$ResourceGroup,
-    [string]$ProductName,    
-    [string]$AppServiceHost,
+    [string]$ProductName,        
     [guid]$TenantId,
-    [string]$ExternalDns,
+    [string]$ExternalDns,    
     [string]$Environment = "dev",
+    [string]$AppServiceHost = "",
     [string]$RoutePath = ""
 )
 
@@ -47,6 +47,10 @@ if ([string]::IsNullOrWhiteSpace($RouteName)) {
 # Set default RoutePath if not provided
 if ([string]::IsNullOrWhiteSpace($RoutePath)) {
     $RoutePath = $ProductName
+}
+# Set default AppServiceHost if not provided
+if ([string]::IsNullOrWhiteSpace($AppServiceHost)) {
+    $AppServiceHost = "web-$ProductName-$Environment-001.azurewebsites.net"
 }
 
 ###############################################################
@@ -165,7 +169,7 @@ if (-not $route) {
     $route = New-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -EndpointName $EndpointName -Name $RouteName -OriginGroupId $originGroup.Id `
         -PatternsToMatch @("/$RoutePath/*", "/$RoutePath") `
-        -RuleSet @($ruleset.Id) `
+        -RuleSet @(@{ Id = $ruleset.Id }) `
         -ForwardingProtocol "MatchRequest" `
         -HttpsRedirect "Enabled" `
         -EnabledState "Enabled" `
