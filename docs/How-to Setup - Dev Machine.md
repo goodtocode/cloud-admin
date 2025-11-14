@@ -162,6 +162,11 @@ winget install Microsoft.Azure.FunctionsCoreTools --silent
 func host start --useHttps --cert host/certs/dev.myorg.com.pfx --password MyPass1234 --verbose
 ```
 
+### Azure Storage Explorer
+```
+winget install --id Microsoft.Azure.StorageExplorer -e
+```
+
 ### Azurite Storage Emulator
 ```
 npm install -g azurite
