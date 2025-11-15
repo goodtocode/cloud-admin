@@ -155,7 +155,7 @@ $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $P
 if (-not $rule) {
     Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
     $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject -ParameterTypeName "UrlPath" -ParameterOperator "Any"
-    $action = New-AzFrontDoorCdnRuleUrlRewriteActionObject -ParameterTypeName "UrlRewrite" -ParameterSourcePattern "/.*" -ParameterDestination "/"
+    $action = New-AzFrontDoorCdnRuleUrlRewriteActionObject -ParameterTypeName "UrlRewrite" -ParameterSourcePattern "/$RoutePath.*" -ParameterDestination "/"
     $rule = New-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -Order 1 -Condition $matchCondition -Action $action
 } else {
     Write-Host "Rule exists: $ruleName in Ruleset: $rulesetName"

@@ -21,6 +21,15 @@ param(
     [string]$AppUrl
 )
 
+Write-Host "=== Testing App Service with AFD Host Header ==="
+try {
+    $afdHost = ([uri]$AfdUrl).Host
+    $response = Invoke-WebRequest -Uri "https://$AppUrl/" -Headers @{ "Host" = $afdHost } -UseBasicParsing
+    Write-Host "App Service with AFD Host Header Status: $($response.StatusCode)"
+} catch {
+    Write-Host "App Service with AFD Host Header Error: $($_.Exception.Message) Inner: $($_.Exception.InnerException.Message)"
+}
+
 Write-Host "=== Testing Front Door Endpoint ==="
 try {
     $afdResponseRoot = Invoke-WebRequest -Uri "$AfdUrl/" -UseBasicParsing
