@@ -166,14 +166,8 @@ if (-not $rule) {
         -ParameterTypeName "UrlRewrite" `
         -ParameterSourcePattern "/$RoutePath(.*)" `
         -ParameterDestination "/" `
-        -PreserveUnmatchedPath $true
-    # Action: Override Host header
-    $hostHeaderAction = New-AzFrontDoorCdnRuleRequestHeaderActionObject `
-        -ParameterTypeName "RequestHeader" `
-        -ParameterHeaderAction "Overwrite" `
-        -ParameterHeaderName "Host" `
-        -ParameterValue $AppServiceHost
-    $actions = @($action, $hostHeaderAction)
+        -ParameterPreserveUnmatchedPath $false
+    $actions = @($action)
 
     $rule = New-AzFrontDoorCdnRule `
         -ResourceGroupName $ResourceGroup `
@@ -198,7 +192,7 @@ if (-not $route) {
         -EndpointName $EndpointName `
         -Name $RouteName `
         -OriginGroupId $originGroup.Id `
-        -PatternsToMatch @("/$RoutePath/*") `
+        -PatternsToMatch @("/$RoutePath", "/$RoutePath/*") `
         -RuleSet @(@{ Id = $ruleset.Id }) `
         -ForwardingProtocol "MatchRequest" `
         -HttpsRedirect "Enabled" `
@@ -207,6 +201,26 @@ if (-not $route) {
         -OriginPath "/"
 } else {
     Write-Host "Route exists: $RouteName"
+}
+
+
+# Test the endpoint after setup
+$testUrl = "https://$EndpointName.$ProfileName.azurefd.net/chapters"
+Write-Host "\nTesting endpoint: $testUrl"
+try {
+    $response = Invoke-WebRequest -Uri $testUrl -UseBasicParsing -TimeoutSec 30
+    Write-Host "--- Test Result ---"
+    Write-Host "Status Code: $($response.StatusCode)"
+    Write-Host "Status Description: $($response.StatusDescription)"
+    if ($response.Content.Length -gt 0) {
+        Write-Host "Response Content (first 200 chars):"
+        Write-Host ($response.Content.Substring(0, [Math]::Min(200, $response.Content.Length)))
+    } else {
+        Write-Host "No content returned."
+    }
+} catch {
+    Write-Host "--- Test Result ---"
+    Write-Host "Request failed: $($_.Exception.Message)"
 }
 
 Write-Host "Setup complete. Default FQDN: https://$EndpointName.$ProfileName.azurefd.net"

@@ -131,4 +131,33 @@ if ($endpoint) {
     Write-Host "Endpoint not found: $EndpointName"
 }
 
+###############################################################
+# Delete Rule from Ruleset
+###############################################################
+$rulesetName = "RewriteToRoot"
+$ruleName = "RewritePathToRoot"
+$rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
+if ($rule) {
+    Write-Host "Removing Rule: $ruleName from Ruleset: $rulesetName"
+    Remove-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName
+} else {
+    Write-Host "Rule not found: $ruleName in Ruleset: $rulesetName"
+}
+
+###############################################################
+# Delete Ruleset if no rules remain
+###############################################################
+ $rules = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -ErrorAction SilentlyContinue
+if ($null -eq $rules -or $rules.Count -eq 0) {
+    $ruleset = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName -ErrorAction SilentlyContinue
+    if ($ruleset) {
+        Write-Host "Removing Ruleset: $rulesetName (no rules remain)"
+        Remove-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName
+    } else {
+        Write-Host "Ruleset not found: $rulesetName"
+    }
+} else {
+    Write-Host "Ruleset $rulesetName not removed (other rules remain)"
+}
+
 Write-Host "✅ Removal complete for $ProductName ($Environment)."
