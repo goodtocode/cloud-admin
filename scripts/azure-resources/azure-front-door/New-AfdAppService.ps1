@@ -154,9 +154,35 @@ $ruleName = "RewritePathToRoot"
 $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
 if (-not $rule) {
     Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
-    $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject -ParameterTypeName "UrlPath" -ParameterOperator "Any"
-    $action = New-AzFrontDoorCdnRuleUrlRewriteActionObject -ParameterTypeName "UrlRewrite" -ParameterSourcePattern "/$RoutePath.*" -ParameterDestination "/"
-    $rule = New-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -Order 1 -Condition $matchCondition -Action $action
+    
+    # Condition: Match URL path starting with /chapters
+    $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject `
+        -ParameterTypeName "UrlPath" `
+        -ParameterOperator "BeginsWith" `
+        -ParameterMatchValue "/$RoutePath"
+
+    # Action: Rewrite to root, preserve unmatched path
+    $action = New-AzFrontDoorCdnRuleUrlRewriteActionObject `
+        -ParameterTypeName "UrlRewrite" `
+        -ParameterSourcePattern "/$RoutePath(.*)" `
+        -ParameterDestination "/" `
+        -PreserveUnmatchedPath $true
+    # Action: Override Host header
+    $hostHeaderAction = New-AzFrontDoorCdnRuleRequestHeaderActionObject `
+        -ParameterTypeName "RequestHeader" `
+        -ParameterHeaderAction "Overwrite" `
+        -ParameterHeaderName "Host" `
+        -ParameterValue $AppServiceHost
+    $actions = @($action, $hostHeaderAction)
+
+    $rule = New-AzFrontDoorCdnRule `
+        -ResourceGroupName $ResourceGroup `
+        -ProfileName $ProfileName `
+        -RuleSetName $rulesetName `
+        -Name $ruleName `
+        -Order 1 `
+        -Condition $matchCondition `
+        -Action $actions
 } else {
     Write-Host "Rule exists: $ruleName in Ruleset: $rulesetName"
 }
@@ -165,15 +191,20 @@ if (-not $rule) {
 $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
     -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
 if (-not $route) {
-    Write-Host "Creating Route: $RouteName with pattern: $RoutePattern"
-    $route = New-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-        -EndpointName $EndpointName -Name $RouteName -OriginGroupId $originGroup.Id `
-        -PatternsToMatch @("/$RoutePath/*", "/$RoutePath") `
+    Write-Host "Creating Route: $RouteName"
+    $route = New-AzFrontDoorCdnRoute `
+        -ResourceGroupName $ResourceGroup `
+        -ProfileName $ProfileName `
+        -EndpointName $EndpointName `
+        -Name $RouteName `
+        -OriginGroupId $originGroup.Id `
+        -PatternsToMatch @("/$RoutePath/*") `
         -RuleSet @(@{ Id = $ruleset.Id }) `
         -ForwardingProtocol "MatchRequest" `
         -HttpsRedirect "Enabled" `
         -EnabledState "Enabled" `
-        -LinkToDefaultDomain "Enabled"
+        -LinkToDefaultDomain "Enabled" `
+        -OriginPath "/"
 } else {
     Write-Host "Route exists: $RouteName"
 }

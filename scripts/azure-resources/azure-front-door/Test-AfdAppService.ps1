@@ -68,3 +68,34 @@ try {
 } catch {
     Write-Host "SSL Check Error: $($_.Exception.Message)"
 }
+
+# === Azure Front Door CDN Resource Checks ===
+Write-Host "=== Azure Front Door CDN Resource Checks ==="
+try {
+    $resourceGroup = "rg-platform-connectivity-westus2-001"
+    $profileName = "afd-platform-hub-westus2-001"
+    $endpointName = "afdend-appaacnorg-dev"
+    $ruleSetName = "RewriteToRoot"
+
+    Write-Host "-- CDN Profile --"
+    $cdnProfile = Get-AzFrontDoorCdnProfile -ResourceGroupName $resourceGroup
+    $cdnProfile | Format-List | Out-String | Write-Host
+
+    Write-Host "-- CDN Endpoint --"
+    $cdnEndpoint = Get-AzFrontDoorCdnEndpoint -ResourceGroupName $resourceGroup -ProfileName $profileName
+    $cdnEndpoint | Format-List | Out-String | Write-Host
+
+    Write-Host "-- CDN Route --"
+    $cdnRoute = Get-AzFrontDoorCdnRoute -ResourceGroupName $resourceGroup -ProfileName $profileName -EndpointName $endpointName
+    $cdnRoute | Format-List | Out-String | Write-Host
+
+    Write-Host "-- CDN RuleSet --"
+    $cdnRuleSet = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $resourceGroup -ProfileName $profileName
+    $cdnRuleSet | Format-List | Out-String | Write-Host
+
+    Write-Host "-- CDN Rule --"
+    $cdnRule = Get-AzFrontDoorCdnRule -ResourceGroupName $resourceGroup -ProfileName $profileName -RuleSetName $ruleSetName
+    $cdnRule | Format-List | Out-String | Write-Host
+} catch {
+    Write-Host "Azure Front Door CDN Resource Check Error: $($_.Exception.Message)"
+}
