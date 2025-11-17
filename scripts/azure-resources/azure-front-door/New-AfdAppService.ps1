@@ -31,7 +31,8 @@ param(
     [string]$ExternalDns,    
     [string]$Environment = "dev",
     [string]$AppServiceHost = "",
-    [string]$RoutePath = ""
+    [string]$RoutePath = "",
+    [bool]$RouteOnly = $false
 )
 
 # Convention-driven variable names
@@ -149,6 +150,30 @@ if (-not $ruleset) {
     Write-Host "Ruleset exists: $rulesetName"
 }
 
+if($RouteOnly) {
+    # Route
+    $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
+        -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
+    if (-not $route) {
+        Write-Host "Creating Route: $RouteName"
+        $route = New-AzFrontDoorCdnRoute `
+            -ResourceGroupName $ResourceGroup `
+            -ProfileName $ProfileName `
+            -EndpointName $EndpointName `
+            -Name $RouteName `
+            -OriginGroupId $originGroup.Id `
+            -PatternsToMatch @("/$RoutePath", "/$RoutePath/*") `
+            -ForwardingProtocol "MatchRequest" `
+            -HttpsRedirect "Enabled" `
+            -EnabledState "Enabled" `
+            -LinkToDefaultDomain "Enabled" `
+            -OriginPath "/"
+    } else {
+        Write-Host "Route exists: $RouteName"
+    }
+    Write-Host "RouteOnly flag is set. Skipping ruleset creation."
+    exit 0
+}
 # Rule
 $ruleName = "RewritePathToRoot"
 $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
@@ -202,7 +227,6 @@ if (-not $route) {
 } else {
     Write-Host "Route exists: $RouteName"
 }
-
 
 # Test the endpoint after setup
 $testUrl = "https://$EndpointName.$ProfileName.azurefd.net/chapters"
