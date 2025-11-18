@@ -147,7 +147,7 @@ if ($rule) {
 ###############################################################
 # Delete Ruleset if no rules remain
 ###############################################################
- $rules = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -ErrorAction SilentlyContinue
+$rules = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -ErrorAction SilentlyContinue
 if ($null -eq $rules -or $rules.Count -eq 0) {
     $ruleset = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName -ErrorAction SilentlyContinue
     if ($ruleset) {

@@ -31,8 +31,7 @@ param(
     [string]$ExternalDns,    
     [string]$Environment = "dev",
     [string]$AppServiceHost = "",
-    [string]$RoutePath = "",
-    [bool]$RouteOnly = $false
+    [string]$RoutePath = ""
 )
 
 # Convention-driven variable names
@@ -141,7 +140,7 @@ if (-not $origin) {
 }
 
 # Ruleset
-$rulesetName = "RewriteToRoot"
+$rulesetName = "${ExternalDnsAlpha}RewriteToRoot"
 $ruleset = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName -ErrorAction SilentlyContinue
 if (-not $ruleset) {
     Write-Host "Creating Ruleset: $rulesetName"
@@ -150,32 +149,8 @@ if (-not $ruleset) {
     Write-Host "Ruleset exists: $rulesetName"
 }
 
-if($RouteOnly) {
-    # Route
-    $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-        -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
-    if (-not $route) {
-        Write-Host "Creating Route: $RouteName"
-        $route = New-AzFrontDoorCdnRoute `
-            -ResourceGroupName $ResourceGroup `
-            -ProfileName $ProfileName `
-            -EndpointName $EndpointName `
-            -Name $RouteName `
-            -OriginGroupId $originGroup.Id `
-            -PatternsToMatch @("/$RoutePath", "/$RoutePath/*") `
-            -ForwardingProtocol "MatchRequest" `
-            -HttpsRedirect "Enabled" `
-            -EnabledState "Enabled" `
-            -LinkToDefaultDomain "Enabled" `
-            -OriginPath "/"
-    } else {
-        Write-Host "Route exists: $RouteName"
-    }
-    Write-Host "RouteOnly flag is set. Skipping ruleset creation."
-    exit 0
-}
 # Rule
-$ruleName = "RewritePathToRoot"
+$ruleName = "${ProductName}RewritePathToRoot"
 $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
 if (-not $rule) {
     Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
