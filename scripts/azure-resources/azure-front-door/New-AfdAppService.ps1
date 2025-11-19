@@ -38,8 +38,8 @@ param(
 $ExternalDnsAlpha = $ExternalDns -replace "[^a-zA-Z]", ""
 $ProfileName     = "afd-platform-hub-westus2-001"
 $EndpointName    = "afdend-$ExternalDnsAlpha-$Environment"
-$OriginGroupName = "afdpool-$ExternalDnsAlpha-$Environment"
-$OriginName      = "afdorigin-$ProductName-$Environment"
+$OriginGroupName = "afdpool-$ExternalDnsAlpha-$ProductName-$Environment"
+$OriginName      = "afdorigin-$ProductName-$Environment-001"
 # Set default RouteName if not provided
 if ([string]::IsNullOrWhiteSpace($RouteName)) {
     $RouteName = "afdroute-$ProductName-$Environment"
@@ -174,7 +174,9 @@ if (-not $rule) {
         -ParameterSourcePattern "/$RoutePath(.*)" `
         -ParameterDestination "/" `
         -ParameterPreserveUnmatchedPath $false
-    $stopAction = New-AzFrontDoorCdnRuleActionObject -ParameterTypeName "StopRuleEvaluation"
+    
+    # Add stop action
+    $stopAction = "StopRuleEvaluation"
     $actions = @($rewriteAction, $stopAction)
 
     # Create the rule: Condition + Action
