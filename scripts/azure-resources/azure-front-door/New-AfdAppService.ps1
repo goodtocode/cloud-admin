@@ -154,27 +154,36 @@ $ruleName = "${ProductName}RewritePathToRoot"
 $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
 if (-not $rule) {
     Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
-    
-    # Condition: Match URL path starting with /chapters
+    # Get all existing rules in the ruleset to determine the next available Order value
+    $existingRules = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -ErrorAction SilentlyContinue
+    if ($existingRules) {
+        $maxOrder = ($existingRules | Measure-Object -Property Order -Maximum).Maximum
+        $nextOrder = [int]$maxOrder + 1
+    } else {
+        $nextOrder = 1
+    }
+    # Condition: Match URL path starting with /$RoutePath
     $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject `
         -ParameterTypeName "UrlPath" `
         -ParameterOperator "BeginsWith" `
         -ParameterMatchValue "/$RoutePath"
 
     # Action: Rewrite to root, preserve unmatched path
-    $action = New-AzFrontDoorCdnRuleUrlRewriteActionObject `
+    $rewriteAction = New-AzFrontDoorCdnRuleUrlRewriteActionObject `
         -ParameterTypeName "UrlRewrite" `
         -ParameterSourcePattern "/$RoutePath(.*)" `
         -ParameterDestination "/" `
         -ParameterPreserveUnmatchedPath $false
-    $actions = @($action)
+    $stopAction = New-AzFrontDoorCdnRuleActionObject -ParameterTypeName "StopRuleEvaluation"
+    $actions = @($rewriteAction, $stopAction)
 
+    # Create the rule: Condition + Action
     $rule = New-AzFrontDoorCdnRule `
         -ResourceGroupName $ResourceGroup `
         -ProfileName $ProfileName `
         -RuleSetName $rulesetName `
         -Name $ruleName `
-        -Order 1 `
+        -Order $nextOrder `
         -Condition $matchCondition `
         -Action $actions
 } else {
@@ -201,25 +210,6 @@ if (-not $route) {
         -OriginPath "/"
 } else {
     Write-Host "Route exists: $RouteName"
-}
-
-# Test the endpoint after setup
-$testUrl = "https://$EndpointName.$ProfileName.azurefd.net/chapters"
-Write-Host "\nTesting endpoint: $testUrl"
-try {
-    $response = Invoke-WebRequest -Uri $testUrl -UseBasicParsing -TimeoutSec 30
-    Write-Host "--- Test Result ---"
-    Write-Host "Status Code: $($response.StatusCode)"
-    Write-Host "Status Description: $($response.StatusDescription)"
-    if ($response.Content.Length -gt 0) {
-        Write-Host "Response Content (first 200 chars):"
-        Write-Host ($response.Content.Substring(0, [Math]::Min(200, $response.Content.Length)))
-    } else {
-        Write-Host "No content returned."
-    }
-} catch {
-    Write-Host "--- Test Result ---"
-    Write-Host "Request failed: $($_.Exception.Message)"
 }
 
 Write-Host "Setup complete. Default FQDN: https://$EndpointName.$ProfileName.azurefd.net"
