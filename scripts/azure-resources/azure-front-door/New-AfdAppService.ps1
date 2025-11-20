@@ -176,7 +176,7 @@ if (-not $rule) {
         -ParameterPreserveUnmatchedPath $false
     
     # Add stop action
-    $stopAction = "StopRuleEvaluation"
+    $stopAction = @{ ParameterTypeName = "StopRuleEvaluation" }
     $actions = @($rewriteAction, $stopAction)
 
     # Create the rule: Condition + Action
