@@ -1,30 +1,34 @@
-<#
-.SYNOPSIS
-Tests the Azure Front Door App Service for a specified parameter.
 
-.DESCRIPTION
-This script tests the Azure Front Door App Service by accepting a parameter to specify the target for testing. It is used to verify the configuration and connectivity of the App Service through Azure Front Door for any given input.
-
-.PARAMETER <ParameterName>
-The value to specify the target for testing (replace <ParameterName> with your actual parameter name).
-
-.EXAMPLE
-PS> .\Test-AfdAppService.ps1 -ParameterName "MyValue"
-This will test the Azure Front Door App Service for the specified value "MyValue".
-
-.NOTES
-Author: GoodToCode
-#>
+#
+# SYNOPSIS
+#   Tests the Azure Front Door App Service for a specified parameter.
+#
+# DESCRIPTION
+#   This script tests the Azure Front Door App Service by accepting a parameter to specify the target for testing. It is used to verify the configuration and connectivity of the App Service through Azure Front Door for any given input.
+#
+# PARAMETER <ParameterName>
+#   The value to specify the target for testing (replace <ParameterName> with your actual parameter name).
+#
+# EXAMPLE
+#   PS> .\Test-AfdAppService.ps1 -ParameterName "MyValue"
+#   This will test the Azure Front Door App Service for the specified value "MyValue".
+#
+# NOTES
+#   Author: GoodToCode
+#
 
 param(
-    [string]$AfdUrl,
-    [string]$AppUrl
+    [string]$AfdEndpointUrl, # https://afdend-mydomain-dev-hmhasdfasdfa6h3.a03.azurefd.net
+    [string]$AfdOriginUrl, # https://web-myproduct-dev-001.azurewebsites.net
+    [string]$AfdSubPath, # "weather",
+    [string]$AfdAssetToTest = "app.css"
 )
 
-# Test the endpoint after setup
-Write-Host "Testing endpoint: $AfdUrl"
+
+# Test the endpoint after setup (always with subpath)
+Write-Host "Testing endpoint: $AfdEndpointUrl/$AfdSubPath"
 try {
-    $response = Invoke-WebRequest -Uri $AfdUrl -UseBasicParsing -TimeoutSec 30
+    $response = Invoke-WebRequest -Uri "$AfdEndpointUrl/$AfdSubPath" -UseBasicParsing -TimeoutSec 30
     Write-Host "--- Test Result ---"
     Write-Host "Status Code: $($response.StatusCode)"
     Write-Host "Status Description: $($response.StatusDescription)"
@@ -41,24 +45,24 @@ try {
 
 Write-Host "=== Testing App Service with AFD Host Header ==="
 try {
-    $afdHost = ([uri]$AfdUrl).Host
-    $response = Invoke-WebRequest -Uri "https://$AppUrl/" -Headers @{ "Host" = $afdHost } -UseBasicParsing
+    $afdHost = ([uri]$AfdEndpointUrl).Host
+    $response = Invoke-WebRequest -Uri "https://$AfdOriginUrl/$AfdSubPath" -Headers @{ "Host" = $afdHost } -UseBasicParsing
     Write-Host "App Service with AFD Host Header Status: $($response.StatusCode)"
 } catch {
     Write-Host "App Service with AFD Host Header Error: $($_.Exception.Message) Inner: $($_.Exception.InnerException.Message)"
 }
 
-Write-Host "=== Testing Front Door Endpoint ==="
+Write-Host "=== Testing Front Door Endpoint (with subpath) ==="
 try {
-    $afdResponseRoot = Invoke-WebRequest -Uri "$AfdUrl/" -UseBasicParsing
-    Write-Host "Root Path Status: $($afdResponseRoot.StatusCode)"
+    $afdResponseRoot = Invoke-WebRequest -Uri "$AfdEndpointUrl/$AfdSubPath" -UseBasicParsing
+    Write-Host "SubPath Status: $($afdResponseRoot.StatusCode)"
 } catch {
-    Write-Host "Root Path Error: $($_.Exception.Message)"
+    Write-Host "SubPath Error: $($_.Exception.Message)"
 }
 
 Write-Host "=== Testing Origin Health Probe (HEAD /) ==="
 try {
-    $originProbe = Invoke-WebRequest -Uri "https://$AppUrl/" -Method Head -UseBasicParsing
+    $originProbe = Invoke-WebRequest -Uri "https://$AfdOriginUrl/" -Method Head -UseBasicParsing
     Write-Host "Origin HEAD Status: $($originProbe.StatusCode)"
 } catch {
     Write-Host "Origin HEAD Error: $($_.Exception.Message)"
@@ -66,7 +70,7 @@ try {
 
 Write-Host "=== Testing Origin GET ==="
 try {
-    $originGet = Invoke-WebRequest -Uri "https://$AppUrl/" -UseBasicParsing
+    $originGet = Invoke-WebRequest -Uri "https://$AfdOriginUrl/" -UseBasicParsing
     Write-Host "Origin GET Status: $($originGet.StatusCode)"
 } catch {
     Write-Host "Origin GET Error: $($_.Exception.Message)"
@@ -74,9 +78,9 @@ try {
 
 Write-Host "=== Checking SSL Certificate ==="
 try {
-    $tcpClient = New-Object System.Net.Sockets.TcpClient($AppUrl, 443)
+    $tcpClient = New-Object System.Net.Sockets.TcpClient($AfdOriginUrl, 443)
     $sslStream = New-Object System.Net.Security.SslStream($tcpClient.GetStream(), $false, ({ $true }))
-    $sslStream.AuthenticateAsClient($AppUrl)
+    $sslStream.AuthenticateAsClient($AfdOriginUrl)
     $cert = $sslStream.RemoteCertificate
     Write-Host "SSL Subject: $($cert.Subject)"
     Write-Host "SSL Issuer: $($cert.Issuer)"
@@ -117,3 +121,34 @@ try {
 } catch {
     Write-Host "Azure Front Door CDN Resource Check Error: $($_.Exception.Message)"
 }
+
+# --- Custom Rewrite/Asset Path Tests (all path-based) ---
+$afdTests = @(
+    @{ Name = "App Root"; Url = "$AfdEndpointUrl/$AfdSubPath"; ExpectSuccess = $true },
+    @{ Name = "Asset in Subpath"; Url = "$AfdEndpointUrl/$AfdSubPath/$AfdAssetToTest"; ExpectSuccess = $true },
+    @{ Name = "Asset at Root (should fail)"; Url = "$AfdEndpointUrl/$AfdAssetToTest"; ExpectSuccess = $false }
+)
+
+Write-Host "--- Azure Front Door Rewrite/Asset Path Tests (Path-Based) ---" -ForegroundColor Cyan
+foreach ($test in $afdTests) {
+    Write-Host "Testing $($test.Name): $($test.Url)" -NoNewline
+    try {
+        $resp = Invoke-WebRequest -Uri $test.Url -Method GET -UseBasicParsing -ErrorAction Stop
+        if ($test.ExpectSuccess -and $resp.StatusCode -eq 200) {
+            Write-Host " [PASS]" -ForegroundColor Green
+        } elseif (-not $test.ExpectSuccess -and $resp.StatusCode -eq 404) {
+            Write-Host " [PASS] (404 as expected)" -ForegroundColor Green
+        } else {
+            Write-Host " [UNEXPECTED STATUS: $($resp.StatusCode)]" -ForegroundColor Yellow
+        }
+    } catch {
+        $status = $_.Exception.Response.StatusCode.value__
+        if (-not $test.ExpectSuccess -and $status -eq 404) {
+            Write-Host " [PASS] (404 as expected)" -ForegroundColor Green
+        } else {
+            Write-Host " [FAIL] $($_.Exception.Message)" -ForegroundColor Red
+        }
+    }
+}
+
+Write-Host "--- Test Complete ---" -ForegroundColor Cyan
