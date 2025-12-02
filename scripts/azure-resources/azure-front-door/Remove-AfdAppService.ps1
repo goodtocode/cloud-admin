@@ -24,6 +24,7 @@ param(
     [string]$ExternalDns,
     [string]$Environment = "dev",
     [string]$RoutePath = ""
+    [bool]$RemoveSharedResources = $false
 )
 
 # Convention-driven variable names
@@ -123,7 +124,7 @@ if ($originGroup) {
 ###############################################################
 $endpoint = Get-AzFrontDoorCdnEndpoint -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
     -EndpointName $EndpointName -ErrorAction SilentlyContinue
-if ($endpoint) {
+if ($endpoint -and $RemoveSharedResources) {
     Write-Host "Removing Endpoint: $EndpointName"
     Remove-AzFrontDoorCdnEndpoint -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
         -EndpointName $EndpointName
