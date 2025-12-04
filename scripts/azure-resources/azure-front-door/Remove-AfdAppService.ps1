@@ -23,7 +23,6 @@ param(
     [guid]$TenantId,
     [string]$ExternalDns,
     [string]$Environment = "dev",
-    [string]$RoutePath = ""
     [bool]$RemoveSharedResources = $false
 )
 
@@ -135,8 +134,8 @@ if ($endpoint -and $RemoveSharedResources) {
 ###############################################################
 # Delete Rule from Ruleset
 ###############################################################
-$rulesetName = "RewriteToRoot"
-$ruleName = "RewritePathToRoot"
+$rulesetName = "${ExternalDnsAlpha}RewriteToOriginPath"
+$ruleName = "${ProductName}RewriteEndpointPathToOriginPath"
 $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
 if ($rule) {
     Write-Host "Removing Rule: $ruleName from Ruleset: $rulesetName"

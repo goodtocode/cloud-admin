@@ -31,7 +31,8 @@ param(
     [string]$ExternalDns,    
     [string]$Environment = "dev",
     [string]$AppServiceHost = "",
-    [string]$RoutePath = ""
+    [string]$AfdEndpointPath = "",
+    [string]$AppServicePath = ""
 )
 
 # Convention-driven variable names
@@ -40,14 +41,24 @@ $ProfileName     = "afd-platform-hub-westus2-001"
 $EndpointName    = "afdend-$ExternalDnsAlpha-$Environment"
 $OriginGroupName = "afdpool-$ExternalDnsAlpha-$ProductName-$Environment"
 $OriginName      = "afdorigin-$ProductName-$Environment-001"
+
 # Set default RouteName if not provided
 if ([string]::IsNullOrWhiteSpace($RouteName)) {
     $RouteName = "afdroute-$ProductName-$Environment"
 }
-# Set default RoutePath if not provided
-if ([string]::IsNullOrWhiteSpace($RoutePath)) {
-    $RoutePath = $ProductName
+
+# Set default path for the Azure Front Door endpoint I.e. /product1
+if ([string]::IsNullOrWhiteSpace($AfdEndpointPath)) {
+    $AfdEndpointPath = $ProductName
 }
+$AfdEndpointPath = $AfdEndpointPath.TrimStart('/').TrimEnd('/')
+
+# Set default path for the Azure App Service. Typically / or /product1
+if ([string]::IsNullOrWhiteSpace($AppServicePath)) {
+    $AppServicePath = $ProductName
+}
+$AppServicePath = $AppServicePath.TrimStart('/').TrimEnd('/')
+
 # Set default AppServiceHost if not provided
 if ([string]::IsNullOrWhiteSpace($AppServiceHost)) {
     $AppServiceHost = "web-$ProductName-$Environment-001.azurewebsites.net"
@@ -139,79 +150,81 @@ if (-not $origin) {
     Write-Host "Origin exists: $OriginName"
 }
 
-# Ruleset
-$rulesetName = "${ExternalDnsAlpha}RewriteToRoot"
-$ruleset = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName -ErrorAction SilentlyContinue
-if (-not $ruleset) {
-    Write-Host "Creating Ruleset: $rulesetName"
-    $ruleset = New-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName
-} else {
-    Write-Host "Ruleset exists: $rulesetName"
-}
-
-# Rule
-$ruleName = "${ProductName}RewritePathToRoot"
-$rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
-if (-not $rule) {
-    Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
-    # Get all existing rules in the ruleset to determine the next available Order value
-    $existingRules = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -ErrorAction SilentlyContinue
-    if ($existingRules) {
-        $maxOrder = ($existingRules | Measure-Object -Property Order -Maximum).Maximum
-        $nextOrder = [int]$maxOrder + 1
+if ($AppServicePath -ne $ProductName) {
+    # Ruleset
+    $rulesetName = "${ExternalDnsAlpha}RewriteToOriginPath"
+    $ruleset = Get-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName -ErrorAction SilentlyContinue
+    if (-not $ruleset) {
+        Write-Host "Creating Ruleset: $rulesetName"
+        $ruleset = New-AzFrontDoorCdnRuleSet -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -Name $rulesetName
     } else {
-        $nextOrder = 1
+        Write-Host "Ruleset exists: $rulesetName"
     }
-    # Condition: Match URL path starting with /$RoutePath
-    $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject `
-        -ParameterTypeName "UrlPath" `
-        -ParameterOperator "BeginsWith" `
-        -ParameterMatchValue "/$RoutePath"
 
-    # Action: Rewrite to root, preserve unmatched path
-    $rewriteAction = New-AzFrontDoorCdnRuleUrlRewriteActionObject `
-        -ParameterTypeName "UrlRewrite" `
-        -ParameterSourcePattern "/$RoutePath(.*)" `
-        -ParameterDestination "/" `
-        -ParameterPreserveUnmatchedPath $false
-    
-    # Add stop action
-    $stopAction = @{ ParameterTypeName = "StopRuleEvaluation" }
-    $actions = @($rewriteAction, $stopAction)
+    # Rule
+    $ruleName = "${ProductName}RewriteEndpointPathToOriginPath"
+    $rule = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -Name $ruleName -ErrorAction SilentlyContinue
+    if (-not $rule) {
+        Write-Host "Creating Rule: $ruleName in Ruleset: $rulesetName"
+        # Get all existing rules in the ruleset to determine the next available Order value
+        $existingRules = Get-AzFrontDoorCdnRule -ResourceGroupName $ResourceGroup -ProfileName $ProfileName -RuleSetName $rulesetName -ErrorAction SilentlyContinue
+        if ($existingRules) {
+            $maxOrder = ($existingRules | Measure-Object -Property Order -Maximum).Maximum
+            $nextOrder = [int]$maxOrder + 1
+        } else {
+            $nextOrder = 1
+        }
+        # Condition: Match URL path starting with /$AfdEndpointPath
+        $matchCondition = New-AzFrontDoorCdnRuleUrlPathConditionObject `
+            -ParameterTypeName "UrlPath" `
+            -ParameterOperator "BeginsWith" `
+            -ParameterMatchValue "/$AfdEndpointPath"
 
-    # Create the rule: Condition + Action
-    $rule = New-AzFrontDoorCdnRule `
-        -ResourceGroupName $ResourceGroup `
-        -ProfileName $ProfileName `
-        -RuleSetName $rulesetName `
-        -Name $ruleName `
-        -Order $nextOrder `
-        -Condition $matchCondition `
-        -Action $actions
-} else {
-    Write-Host "Rule exists: $ruleName in Ruleset: $rulesetName"
-}
+        # Action: Rewrite to root, preserve unmatched path
+        $rewriteAction = New-AzFrontDoorCdnRuleUrlRewriteActionObject `
+            -ParameterTypeName "UrlRewrite" `
+            -ParameterSourcePattern "/$AfdEndpointPath(.*)" `
+            -ParameterDestination "/" `
+            -ParameterPreserveUnmatchedPath $false
+        
+        # Add stop action
+        $stopAction = @{ ParameterTypeName = "StopRuleEvaluation" }
+        $actions = @($rewriteAction, $stopAction)
 
-# Route
-$route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
-    -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
-if (-not $route) {
-    Write-Host "Creating Route: $RouteName"
-    $route = New-AzFrontDoorCdnRoute `
-        -ResourceGroupName $ResourceGroup `
-        -ProfileName $ProfileName `
-        -EndpointName $EndpointName `
-        -Name $RouteName `
-        -OriginGroupId $originGroup.Id `
-        -PatternsToMatch @("/$RoutePath", "/$RoutePath/*") `
-        -RuleSet @(@{ Id = $ruleset.Id }) `
-        -ForwardingProtocol "MatchRequest" `
-        -HttpsRedirect "Enabled" `
-        -EnabledState "Enabled" `
-        -LinkToDefaultDomain "Enabled" `
-        -OriginPath "/"
-} else {
-    Write-Host "Route exists: $RouteName"
+        # Create the rule: Condition + Action
+        $rule = New-AzFrontDoorCdnRule `
+            -ResourceGroupName $ResourceGroup `
+            -ProfileName $ProfileName `
+            -RuleSetName $rulesetName `
+            -Name $ruleName `
+            -Order $nextOrder `
+            -Condition $matchCondition `
+            -Action $actions
+    } else {
+        Write-Host "Rule exists: $ruleName in Ruleset: $rulesetName"
+    }
+
+    # Route
+    $route = Get-AzFrontDoorCdnRoute -ResourceGroupName $ResourceGroup -ProfileName $ProfileName `
+        -EndpointName $EndpointName -Name $RouteName -ErrorAction SilentlyContinue
+    if (-not $route) {
+        Write-Host "Creating Route: $RouteName"
+        $route = New-AzFrontDoorCdnRoute `
+            -ResourceGroupName $ResourceGroup `
+            -ProfileName $ProfileName `
+            -EndpointName $EndpointName `
+            -Name $RouteName `
+            -OriginGroupId $originGroup.Id `
+            -PatternsToMatch @("/$AfdEndpointPath", "/$AfdEndpointPath/*") `
+            -RuleSet @(@{ Id = $ruleset.Id }) `
+            -ForwardingProtocol "MatchRequest" `
+            -HttpsRedirect "Enabled" `
+            -EnabledState "Enabled" `
+            -LinkToDefaultDomain "Enabled" `
+            -OriginPath "/$AppServicePath"
+    } else {
+        Write-Host "Route exists: $RouteName"
+    }
 }
 
 Write-Host "Setup complete. Default FQDN: https://$EndpointName.$ProfileName.azurefd.net"
