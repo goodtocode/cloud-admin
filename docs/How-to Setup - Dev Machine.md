@@ -51,7 +51,7 @@ winget install --id GitHub.cli --silent
 ### Visual Studio
 [Visual Studio Workload IDs](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2026&preserve-view=true)
 ```
-winget install --id Microsoft.VisualStudio.2026.Community --override "--quiet --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
+winget install --id Microsoft.VisualStudio.Community --override "--quiet --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
 ```
 Common workloads:
 * Microsoft.VisualStudio.Workload.Azure

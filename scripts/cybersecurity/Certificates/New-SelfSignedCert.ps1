@@ -19,7 +19,7 @@ param (
 	[string]$CertStoreLocation = 'Cert:\LocalMachine\My',
     [int]$ExpirationMonths = 24,
     [int]$KeyLength = 2048,
-    [string]$Password = (New-Guid).ToString()
+    [SecureString]$Password = (ConvertTo-SecureString -String (New-Guid).ToString() -Force -AsPlainText)
 )
 
 ####################################################################################
@@ -78,9 +78,10 @@ $thumbprint = $Certificate.Thumbprint
 Write-Host "$crlf[Info] Created $CertStoreLocation with thumbprint $thumbprint $crlf"
 
 # Export Pfx
-$securePw = ConvertTo-SecureString -String $Password -Force -AsPlainText
-Export-PfxCertificate -Cert "$CertStoreLocation\$thumbprint" -FilePath $FilePath -Password $securePw
-Write-Host "$crlf[Info] Created $FilePath with password $Password $crlf"
+
+# Export Pfx using the provided SecureString password
+Export-PfxCertificate -Cert "$CertStoreLocation\$thumbprint" -FilePath $FilePath -Password $Password
+Write-Host "$crlf[Info] Created $FilePath with provided password $crlf"
 
 # Export Cer
 Export-Certificate -Cert "$CertStoreLocation\$thumbprint" -Filepath "$FilePath.cer" #-Type CERT -NoClobber
