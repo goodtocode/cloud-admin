@@ -49,17 +49,17 @@ winget install --id GitHub.cli --silent
 
 ## IDEs and Editors
 ### Visual Studio
-[Visual Studio Workload IDs](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2022&preserve-view=true)
+[Visual Studio Workload IDs](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2026&preserve-view=true)
 ```
-winget install --id Microsoft.VisualStudio.2022.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
+winget install --id Microsoft.VisualStudio.2026.Community --override "--quiet --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
 ```
 Common workloads:
-* Microsoft.Visualstudio.Workload.Azure
+* Microsoft.VisualStudio.Workload.Azure
 * Microsoft.VisualStudio.Workload.NetCrossPlat
 * Microsoft.VisualStudio.Workload.NetWeb
 * Microsoft.VisualStudio.Workload.Node
 * Microsoft.VisualStudio.Workload.ManagedGame
-* Microsoft.VisualStudio.Workload.ManagedDesktop 
+* Microsoft.VisualStudio.Workload.ManagedDesktop
 * Microsoft.VisualStudio.Workload.Office
 * Microsoft.VisualStudio.Workload.Python
 * Microsoft.VisualStudio.Workload.Universal
