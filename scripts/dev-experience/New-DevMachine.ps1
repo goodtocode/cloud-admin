@@ -60,6 +60,11 @@ if (-not (Get-Command powertoys -ErrorAction SilentlyContinue)) {
 } else {
     Write-Host "PowerToys already installed." -ForegroundColor DarkGray
 }
+if (-not (Get-Command "StorageExplorer" -ErrorAction SilentlyContinue)) {
+    winget install --id Microsoft.Azure.StorageExplorer -e
+} else {
+    Write-Host "Azure Storage Explorer already installed." -ForegroundColor DarkGray
+}
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     winget install --id Git.Git --silent
 } else {
