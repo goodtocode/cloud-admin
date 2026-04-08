@@ -10,13 +10,9 @@
 ####################################################################################
 
 Param(
-    [string]$TestProjectFilter = '*Specs*.csproj',    
+    [string]$TestProjectFilter = '*Tests*.csproj',    
     [switch]$ProdPackagesOnly = $false,    
-    [string[]]$ProductionAssemblies = @(
-        "*.Core.Application",
-        "*.Presentation.WebApi",
-        "*.Presentation.Blazor"
-    )
+    [string[]]$ProductionAssemblies = @()
 )
 ####################################################################################
 if ($IsWindows) {Set-ExecutionPolicy Unrestricted -Scope Process -Force}

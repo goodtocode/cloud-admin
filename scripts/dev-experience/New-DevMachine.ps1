@@ -101,7 +101,7 @@ Write-Host "\n==============================="
 Write-Host "Installing .NET developer experience..." -ForegroundColor Yellow
 Write-Host "===============================\n"
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    winget install --id Microsoft.DotNet.SDK.9 --silent
+    winget install --id Microsoft.DotNet.SDK.10 --silent
 } else {
     Write-Host ".NET SDK already installed." -ForegroundColor DarkGray
 }
@@ -111,9 +111,9 @@ if (-not (dotnet tool list -g | Select-String -Pattern "dotnet-ef")) {
     Write-Host "dotnet-ef tool already installed." -ForegroundColor DarkGray
 }
 if (-not (Get-Command devenv -ErrorAction SilentlyContinue)) {
-    winget install --id Microsoft.VisualStudio.2022.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
+    winget install --id Microsoft.VisualStudio.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
 } else {
-    Write-Host "Visual Studio 2022 already installed." -ForegroundColor DarkGray
+    Write-Host "Visual Studio already installed." -ForegroundColor DarkGray
 }
 if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
     winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
@@ -124,8 +124,6 @@ if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
 $extensions = @(
     "ms-dotnettools.csharp",
     "ms-dotnettools.vscodeintellicode-csharp",
-    "ms-dotnettools.dotnet-interactive-vscode",
-    "donjayamanne.kusto",
     "ms-vscode.hexeditor",
     "ms-vscode.powershell",
     "ms-vscode.copilot-mermaid-diagram",

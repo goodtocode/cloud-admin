@@ -24,11 +24,6 @@ winget install --id Microsoft.PowerToys --source winget
 wsl --install
 ```
 
-### Smartbear SoapUI API Testing
-```
-winget install --id Smartbear.SoapUI --source winget
-```
-
 ## Git version control system
 ### Git CLI (git)
 ```
@@ -78,11 +73,6 @@ IntelliCode for C#
 ```
 code --install-extension ms-dotnettools.vscodeintellicode-csharp
 ```
-Add Notebook to VS Code
-Polyglot (.dib) no python needed
-```
-code --install-extension ms-dotnettools.dotnet-interactive-vscode
-```
 Add Kusto KQL and Log Analytics Workspace
 ```
 code --install-extension donjayamanne.kusto
@@ -126,7 +116,7 @@ winget install Paint.NET --silent
 ## .NET Development
 ### .NET SDK (dotnet)
 ```
-winget install Microsoft.DotNet.SDK.9 --silent
+winget install Microsoft.DotNet.SDK.10 --silent
 ```
 
 ### .NET Entity Framework CLI (dotnet ef)
