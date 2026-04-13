@@ -75,10 +75,17 @@ if (-not (Get-Command "PaintDotNet" -ErrorAction SilentlyContinue)) {
 } else {
     Write-Host "Paint.NET already installed." -ForegroundColor DarkGray
 }
-if (-not (wsl -l -q | Select-String -Pattern "Ubuntu")) {
-    wsl --install
-} else {
-    Write-Host "WSL already installed." -ForegroundColor DarkGray
+try {
+    if (-not (wsl -l -q | Select-String -Pattern "Ubuntu")) {
+        wsl --install
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "WSL installation failed or is corrupted. Please repair WSL manually and re-run this script." -ForegroundColor Red
+        }
+    } else {
+        Write-Host "WSL already installed." -ForegroundColor DarkGray
+    }
+} catch {
+    Write-Host "WSL installation encountered an error: $_.Exception.Message. Please repair WSL manually and re-run this script." -ForegroundColor Red
 }
 
 # Azure Developer Experience
@@ -102,13 +109,23 @@ Write-Host "Installing .NET developer experience..." -ForegroundColor Yellow
 Write-Host "===============================\n"
 if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
     winget install --id Microsoft.DotNet.SDK.10 --silent
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+        Write-Host "dotnet still not found after install. Please restart your shell and re-run this script to complete .NET setup." -ForegroundColor Red
+    } else {
+        if (-not (dotnet tool list -g | Select-String -Pattern "dotnet-ef")) {
+            dotnet tool install --global dotnet-ef
+        } else {
+            Write-Host "dotnet-ef tool already installed." -ForegroundColor DarkGray
+        }
+    }
 } else {
     Write-Host ".NET SDK already installed." -ForegroundColor DarkGray
-}
-if (-not (dotnet tool list -g | Select-String -Pattern "dotnet-ef")) {
-    dotnet tool install --global dotnet-ef
-} else {
-    Write-Host "dotnet-ef tool already installed." -ForegroundColor DarkGray
+    if (-not (dotnet tool list -g | Select-String -Pattern "dotnet-ef")) {
+        dotnet tool install --global dotnet-ef
+    } else {
+        Write-Host "dotnet-ef tool already installed." -ForegroundColor DarkGray
+    }
 }
 if (-not (Get-Command devenv -ErrorAction SilentlyContinue)) {
     winget install --id Microsoft.VisualStudio.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
@@ -117,41 +134,80 @@ if (-not (Get-Command devenv -ErrorAction SilentlyContinue)) {
 }
 if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
     winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
+    $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+    if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
+        Write-Host "VS Code still not found after install. Please restart your shell and re-run this script to complete VS Code setup and extension installation." -ForegroundColor Red
+    } else {
+        $extensions = @(
+            "ms-dotnettools.csharp",
+            "ms-dotnettools.vscodeintellicode-csharp",
+            "ms-vscode.hexeditor",
+            "ms-vscode.powershell",
+            "ms-vscode.copilot-mermaid-diagram",
+            "ms-vscode-remote.remote-wsl",
+            "redhat.vscode-xml",
+            "redhat.vscode-yaml",
+            "moshfeu.compare-folders",
+            "ms-azuretools.vscode-azureresourcegroups",
+            "ms-azuretools.vscode-azure-github-copilot",
+            "GitHub.copilot",
+            "GitHub.copilot-chat",
+            "ms-windows-ai-studio.windows-ai-studio",
+            "TeamsDevApp.vscode-ai-foundry",
+            "ms-mssql.mssql",
+            "ms-mssql.sql-database-projects-vscode",
+            "DBCode.dbcode"
+        )
+        foreach ($ext in $extensions) {
+            if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
+                Write-Host "\n--- Installing VS Code extension: $ext ---\n" -ForegroundColor Green
+                code --install-extension $ext
+            } else {
+                Write-Host "VS Code extension $ext already installed." -ForegroundColor DarkGray
+            }
+        }
+    }
 } else {
     Write-Host "VS Code already installed." -ForegroundColor DarkGray
-}
-# VS Code Extensions
-$extensions = @(
-    "ms-dotnettools.csharp",
-    "ms-dotnettools.vscodeintellicode-csharp",
-    "ms-vscode.hexeditor",
-    "ms-vscode.powershell",
-    "ms-vscode.copilot-mermaid-diagram",
-    "ms-vscode-remote.remote-wsl",
-    "redhat.vscode-xml",
-    "redhat.vscode-yaml",
-    "moshfeu.compare-folders",
-    "ms-azuretools.vscode-azureresourcegroups",
-    "ms-azuretools.vscode-azure-github-copilot",
-    "GitHub.copilot",
-    "GitHub.copilot-chat",
-    "ms-windows-ai-studio.windows-ai-studio",
-    "TeamsDevApp.vscode-ai-foundry",
-    "ms-mssql.mssql",
-    "ms-mssql.sql-database-projects-vscode",
-    "DBCode.dbcode"
-)
-foreach ($ext in $extensions) {
-    if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
-        Write-Host "\n--- Installing VS Code extension: $ext ---\n" -ForegroundColor Green
-        code --install-extension $ext
+    if (Get-Command code -ErrorAction SilentlyContinue) {
+        $extensions = @(
+            "ms-dotnettools.csharp",
+            "ms-dotnettools.vscodeintellicode-csharp",
+            "ms-vscode.hexeditor",
+            "ms-vscode.powershell",
+            "ms-vscode.copilot-mermaid-diagram",
+            "ms-vscode-remote.remote-wsl",
+            "redhat.vscode-xml",
+            "redhat.vscode-yaml",
+            "moshfeu.compare-folders",
+            "ms-azuretools.vscode-azureresourcegroups",
+            "ms-azuretools.vscode-azure-github-copilot",
+            "GitHub.copilot",
+            "GitHub.copilot-chat",
+            "ms-windows-ai-studio.windows-ai-studio",
+            "TeamsDevApp.vscode-ai-foundry",
+            "ms-mssql.mssql",
+            "ms-mssql.sql-database-projects-vscode",
+            "DBCode.dbcode"
+        )
+        foreach ($ext in $extensions) {
+            if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
+                Write-Host "\n--- Installing VS Code extension: $ext ---\n" -ForegroundColor Green
+                code --install-extension $ext
+            } else {
+                Write-Host "VS Code extension $ext already installed." -ForegroundColor DarkGray
+            }
+        }
     } else {
-        Write-Host "VS Code extension $ext already installed." -ForegroundColor DarkGray
+        Write-Host "VS Code command not found. Please restart your shell and re-run this script to install extensions." -ForegroundColor Red
     }
 }
 if (-not (Get-Command sqlservr -ErrorAction SilentlyContinue)) {
     Write-Host "\n--- Installing SQL Server Developer Edition ---\n" -ForegroundColor Yellow
     winget install Microsoft.SQLServer.2022.Developer -e --override "/Q /IACCEPTSQLSERVERLICENSETERMS /ACTION=Install /FEATURES=SQLENGINE /INSTANCENAME=SQLEXPRESS /ENU"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "SQL Server installation did not complete successfully (exit code $LASTEXITCODE). You may need to retry or install manually." -ForegroundColor Red
+    }
 } else {
     Write-Host "SQL Server Developer Edition already installed." -ForegroundColor DarkGray
 }
