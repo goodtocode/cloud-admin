@@ -204,9 +204,11 @@ if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
 }
 if (-not (Get-Command sqlservr -ErrorAction SilentlyContinue)) {
     Write-Host "\n--- Installing SQL Server Developer Edition ---\n" -ForegroundColor Yellow
-    winget install Microsoft.SQLServer.2022.Developer -e --override "/Q /IACCEPTSQLSERVERLICENSETERMS /ACTION=Install /FEATURES=SQLENGINE /INSTANCENAME=SQLEXPRESS /ENU"
+    winget install Microsoft.SQLServer.2022.Developer -e --override "/Q /IACCEPTSQLSERVERLICENSETERMS /ACTION=Install /ENU"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "SQL Server installation did not complete successfully (exit code $LASTEXITCODE). You may need to retry or install manually." -ForegroundColor Red
+    } else {
+        Write-Host "SQL Server Developer installed using default instance settings." -ForegroundColor DarkGray
     }
 } else {
     Write-Host "SQL Server Developer Edition already installed." -ForegroundColor DarkGray
