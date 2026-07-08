@@ -3,6 +3,7 @@
     Sets up a new developer machine with mainstream tools and optional extras.
 .DESCRIPTION
     Installs .NET SDK, PowerShell, Visual Studio 2022, VS Code, SQL Server Developer Edition by default.
+    Also installs Ollama by default for local AI model/runtime support and pulls Phi-4.
     Optionally installs JavaScript/Node.js, Python, Power Platform tools, and non-mainstream .NET SDKs.
 .PARAMETER InstallNode
     Installs Node.js and JavaScript tooling if set to $true.
@@ -218,6 +219,34 @@ if (-not (Get-Command func -ErrorAction SilentlyContinue)) {
     winget install Microsoft.Azure.FunctionsCoreTools --silent
 } else {
     Write-Host "Azure Functions Core Tools already installed." -ForegroundColor DarkGray
+}
+if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
+    Write-Host "\n--- Installing Ollama ---\n" -ForegroundColor Yellow
+    winget install --id Ollama.Ollama -e --silent
+} else {
+    Write-Host "Ollama already installed." -ForegroundColor DarkGray
+}
+
+$env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
+if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
+    Write-Host "Ollama command not found after install. Please open a new terminal window and run: ollama pull phi4" -ForegroundColor Red
+} else {
+    $phi4Installed = $false
+    try {
+        $phi4Installed = [bool](ollama list 2>$null | Where-Object { $_ -match '^\s*phi4(?::\S+)?\s' })
+    } catch {
+        Write-Host "Unable to query existing Ollama models. Attempting to pull Phi-4 anyway..." -ForegroundColor Yellow
+    }
+
+    if (-not $phi4Installed) {
+        Write-Host "\n--- Pulling Phi-4 model in Ollama ---\n" -ForegroundColor Yellow
+        ollama pull phi4
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Phi-4 pull failed. If this is a fresh install, open a new terminal window and re-run: ollama pull phi4" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "Phi-4 already installed in Ollama." -ForegroundColor DarkGray
+    }
 }
 
 # Optional installations

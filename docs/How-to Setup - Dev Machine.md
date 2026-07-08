@@ -163,6 +163,33 @@ npm install -g azurite
 ```
 
 ## AI Development
+### Ollama (ollama)
+```
+winget install --id Ollama.Ollama -e --silent
+```
+
+If `ollama` is not recognized after install, close the terminal, open a new terminal window, and retry the commands below.
+
+### Phi-4 in Ollama (CLI)
+Pull and run Phi-4 locally with Ollama:
+```
+ollama pull phi4
+ollama run phi4
+```
+
+Optional health checks:
+```
+ollama --version
+ollama list
+```
+
+One-liner (install + pull + run):
+```
+winget install --id Ollama.Ollama -e --silent
+ollama pull phi4
+ollama run phi4
+```
+
 ### GitHub Copilot Extension
 ```
 code --install-extension GitHub.copilot
