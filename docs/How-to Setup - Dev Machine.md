@@ -41,7 +41,6 @@ git config --global user.name "Your Name"
 winget install --id GitHub.cli --silent
 ```
 
-
 ## IDEs and Editors
 ### Visual Studio
 [Visual Studio Workload IDs](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-community?view=vs-2026&preserve-view=true)
@@ -63,7 +62,7 @@ Common workloads:
 ### VS Code (code .)
 Install VS Code
 ```
-winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
+winget install --id Microsoft.VisualStudioCode --exact --silent --accept-package-agreements --accept-source-agreements
 ```
 Add C# DevKit to VS Code
 ```
@@ -73,17 +72,13 @@ IntelliCode for C#
 ```
 code --install-extension ms-dotnettools.vscodeintellicode-csharp
 ```
-Add Kusto KQL and Log Analytics Workspace
-```
-code --install-extension donjayamanne.kusto
-```
 
 ### General VS Code Extensions
 Hex Editor
 ```
 code --install-extension ms-vscode.hexeditor
 ```
-PowerShell Extension
+PowerShell Extension (critical)
 ```
 code --install-extension ms-vscode.powershell
 ```
@@ -95,17 +90,13 @@ Remote WSL Extension
 ```
 code --install-extension ms-vscode-remote.remote-wsl
 ```
-XML Extension
-```
-code --install-extension redhat.vscode-xml
-```
-YAML Extension
+YAML Extension (critical, non-Microsoft exception)
 ```
 code --install-extension redhat.vscode-yaml
 ```
-Compare Folders Extension
+Bicep Extension (critical)
 ```
-code --install-extension moshfeu.compare-folders
+code --install-extension ms-azuretools.vscode-bicep
 ```
 
 ### Paint.NET
@@ -202,9 +193,13 @@ code --install-extension GitHub.copilot-chat
 ```
 code --install-extension ms-windows-ai-studio.windows-ai-studio
 ```
-### Teams AI Foundry Extension
+### Microsoft Scout Agent
 ```
-code --install-extension TeamsDevApp.vscode-ai-foundry
+winget install --id Microsoft.ScoutAgent --exact --silent --accept-package-agreements --accept-source-agreements
+```
+### Microsoft 365 Copilot
+```
+winget install --id Microsoft.365Copilot --exact --silent --accept-package-agreements --accept-source-agreements
 ```
 
 ## Database Development
@@ -220,18 +215,18 @@ code --install-extension ms-mssql.mssql
 code --install-extension ms-mssql.sql-database-projects-vscode
 ```
 
-### Database Queries/ERD
+### Database Queries/ERD (non-Microsoft exception)
 ```
 code --install-extension DBCode.dbcode
 ```
 
-## Javascript Development
+## Javascript Development (optional)
 ### Node.js (node and npm)
 ```
 winget install -e --id OpenJS.NodeJS --silent
 ```
 
-## Python Development
+## Python Development (optional)
 ### Python (pip)
 ```
 winget install python.python.3.12 --silent

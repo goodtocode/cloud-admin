@@ -2,9 +2,11 @@
 .SYNOPSIS
     Sets up a new developer machine with mainstream tools and optional extras.
 .DESCRIPTION
-    Installs .NET SDK, PowerShell, Visual Studio 2022, VS Code, SQL Server Developer Edition by default.
-    Also installs Ollama by default for local AI model/runtime support and pulls Phi-4.
-    Optionally installs JavaScript/Node.js, Python, Power Platform tools, and non-mainstream .NET SDKs.
+    Installs .NET SDK, PowerShell, Visual Studio, VS Code, SQL Server Developer Edition by default.
+    Also installs Ollama, Microsoft Scout Agent, and Microsoft 365 Copilot by default for local AI
+    model/runtime support and pulls Phi-4.
+    JavaScript/Node.js and Python are strongly optional and are only installed when explicitly requested.
+    Optionally installs Power Platform tools and non-mainstream .NET SDKs.
 .PARAMETER InstallNode
     Installs Node.js and JavaScript tooling if set to $true.
 .PARAMETER InstallPython
@@ -13,15 +15,21 @@
     Installs Power Platform CLI/tools if set to $true.
 .PARAMETER InstallDotNetExtras
     Installs non-mainstream .NET SDKs if set to $true.
+.PARAMETER GitUserName
+    Sets git config --global user.name to this value if provided.
+.PARAMETER GitUserEmail
+    Sets git config --global user.email to this value if provided.
 .EXAMPLE
-    .\New-DevMachine.ps1 -InstallNode $true -InstallPython $false
+    .\New-DevMachine.ps1 -InstallNode $true -InstallPython $false -GitUserName "Your Name" -GitUserEmail "you@example.com"
 #>
 
 param(
     [bool]$InstallNode = $false,
     [bool]$InstallPython = $false,
     [bool]$InstallPowerPlatform = $false,
-    [bool]$InstallDotNetExtras = $false
+    [bool]$InstallDotNetExtras = $false,
+    [string]$GitUserName = "",
+    [string]$GitUserEmail = ""
 )
 
 ####################################################################################
@@ -70,6 +78,17 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     winget install --id Git.Git --silent
 } else {
     Write-Host "Git already installed." -ForegroundColor DarkGray
+}
+if ($GitUserName) {
+    git config --global user.name $GitUserName
+}
+if ($GitUserEmail) {
+    git config --global user.email $GitUserEmail
+}
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+    winget install --id GitHub.cli --silent
+} else {
+    Write-Host "GitHub CLI already installed." -ForegroundColor DarkGray
 }
 if (-not (Get-Command "PaintDotNet" -ErrorAction SilentlyContinue)) {
     winget install Paint.NET --silent
@@ -128,80 +147,49 @@ if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
         Write-Host "dotnet-ef tool already installed." -ForegroundColor DarkGray
     }
 }
+dotnet dev-certs https --trust
 if (-not (Get-Command devenv -ErrorAction SilentlyContinue)) {
     winget install --id Microsoft.VisualStudio.Community --override "--quiet --add Microsoft.Visualstudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Data --add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb"
 } else {
     Write-Host "Visual Studio already installed." -ForegroundColor DarkGray
 }
 if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
-    winget install Microsoft.VisualStudioCode --override '/SILENT /mergetasks="!runcode,addcontextmenufiles,addcontextmenufolders"'
+    winget install --id Microsoft.VisualStudioCode --exact --silent --accept-package-agreements --accept-source-agreements
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
     if (-not (Get-Command code -ErrorAction SilentlyContinue)) {
         Write-Host "VS Code still not found after install. Please restart your shell and re-run this script to complete VS Code setup and extension installation." -ForegroundColor Red
-    } else {
-        $extensions = @(
-            "ms-dotnettools.csharp",
-            "ms-dotnettools.vscodeintellicode-csharp",
-            "ms-vscode.hexeditor",
-            "ms-vscode.powershell",
-            "ms-vscode.copilot-mermaid-diagram",
-            "ms-vscode-remote.remote-wsl",
-            "redhat.vscode-xml",
-            "redhat.vscode-yaml",
-            "moshfeu.compare-folders",
-            "ms-azuretools.vscode-azureresourcegroups",
-            "ms-azuretools.vscode-azure-github-copilot",
-            "GitHub.copilot",
-            "GitHub.copilot-chat",
-            "ms-windows-ai-studio.windows-ai-studio",
-            "TeamsDevApp.vscode-ai-foundry",
-            "ms-mssql.mssql",
-            "ms-mssql.sql-database-projects-vscode",
-            "DBCode.dbcode"
-        )
-        foreach ($ext in $extensions) {
-            if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
-                Write-Host "\n--- Installing VS Code extension: $ext ---\n" -ForegroundColor Green
-                code --install-extension $ext
-            } else {
-                Write-Host "VS Code extension $ext already installed." -ForegroundColor DarkGray
-            }
+    }
+}
+if (Get-Command code -ErrorAction SilentlyContinue) {
+    # Critical: C# (csharp), SQL Project, SSMS (mssql), Bicep, YAML (redhat), PowerShell. DBCode and redhat.vscode-yaml are the only non-Microsoft exceptions kept.
+    $extensions = @(
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscodeintellicode-csharp",
+        "ms-vscode.hexeditor",
+        "ms-vscode.powershell",
+        "ms-vscode.copilot-mermaid-diagram",
+        "ms-vscode-remote.remote-wsl",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-bicep",
+        "ms-azuretools.vscode-azureresourcegroups",
+        "ms-azuretools.vscode-azure-github-copilot",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "ms-windows-ai-studio.windows-ai-studio",
+        "ms-mssql.mssql",
+        "ms-mssql.sql-database-projects-vscode",
+        "DBCode.dbcode"
+    )
+    foreach ($ext in $extensions) {
+        if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
+            Write-Host "\n--- Installing VS Code extension: $ext ---\n" -ForegroundColor Green
+            code --install-extension $ext
+        } else {
+            Write-Host "VS Code extension $ext already installed." -ForegroundColor DarkGray
         }
     }
 } else {
-    Write-Host "VS Code already installed." -ForegroundColor DarkGray
-    if (Get-Command code -ErrorAction SilentlyContinue) {
-        $extensions = @(
-            "ms-dotnettools.csharp",
-            "ms-dotnettools.vscodeintellicode-csharp",
-            "ms-vscode.hexeditor",
-            "ms-vscode.powershell",
-            "ms-vscode.copilot-mermaid-diagram",
-            "ms-vscode-remote.remote-wsl",
-            "redhat.vscode-xml",
-            "redhat.vscode-yaml",
-            "moshfeu.compare-folders",
-            "ms-azuretools.vscode-azureresourcegroups",
-            "ms-azuretools.vscode-azure-github-copilot",
-            "GitHub.copilot",
-            "GitHub.copilot-chat",
-            "ms-windows-ai-studio.windows-ai-studio",
-            "TeamsDevApp.vscode-ai-foundry",
-            "ms-mssql.mssql",
-            "ms-mssql.sql-database-projects-vscode",
-            "DBCode.dbcode"
-        )
-        foreach ($ext in $extensions) {
-            if (-not (code --list-extensions | Select-String -Pattern "^$ext$")) {
-                Write-Host "\n--- Installing VS Code extension: $ext ---\n" -ForegroundColor Green
-                code --install-extension $ext
-            } else {
-                Write-Host "VS Code extension $ext already installed." -ForegroundColor DarkGray
-            }
-        }
-    } else {
-        Write-Host "VS Code command not found. Please restart your shell and re-run this script to install extensions." -ForegroundColor Red
-    }
+    Write-Host "VS Code command not found. Please restart your shell and re-run this script to install extensions." -ForegroundColor Red
 }
 if (-not (Get-Command sqlservr -ErrorAction SilentlyContinue)) {
     Write-Host "\n--- Installing SQL Server Developer Edition ---\n" -ForegroundColor Yellow
@@ -226,6 +214,10 @@ if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
 } else {
     Write-Host "Ollama already installed." -ForegroundColor DarkGray
 }
+Write-Host "\n--- Installing Microsoft Scout Agent ---\n" -ForegroundColor Yellow
+winget install --id Microsoft.ScoutAgent --exact --silent --accept-package-agreements --accept-source-agreements
+Write-Host "\n--- Installing Microsoft 365 Copilot ---\n" -ForegroundColor Yellow
+winget install --id Microsoft.365Copilot --exact --silent --accept-package-agreements --accept-source-agreements
 
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::Machine) + ";" + [System.Environment]::GetEnvironmentVariable("PATH", [System.EnvironmentVariableTarget]::User)
 if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
@@ -275,6 +267,13 @@ if ($InstallPowerPlatform) {
         winget install --id Microsoft.PowerPlatformCLI --silent
     } else {
         Write-Host "Power Platform CLI already installed." -ForegroundColor DarkGray
+    }
+    if (Get-Command code -ErrorAction SilentlyContinue) {
+        if (-not (code --list-extensions | Select-String -Pattern "^microsoft-IsvExpTools.powerplatform-vscode$")) {
+            code --install-extension microsoft-IsvExpTools.powerplatform-vscode
+        } else {
+            Write-Host "Power Platform VS Code extension already installed." -ForegroundColor DarkGray
+        }
     }
 }
 
