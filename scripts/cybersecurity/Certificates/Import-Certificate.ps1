@@ -11,7 +11,7 @@ param (
 	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
  	[string]$Path = $(throw '-Path is a required parameter.'),
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-    [string]$Password = $(throw '-Password is a required parameter.'),
+    [SecureString]$Password,
 	[string]$CertStoreLocation = 'cert:\LocalMachine\My'
 )
 ####################################################################################
@@ -29,5 +29,5 @@ Write-Host "*****************************"
 Write-Host "*** Starting: $ThisScript On: $(Get-Date)"
 Write-Host "*****************************"
 ####################################################################################
-$mypwd = ConvertTo-SecureString -String $Password -AsPlainText -Force
+$mypwd = $Password
 Import-PfxCertificate -FilePath $Path -CertStoreLocation $CertStoreLocation -Password $mypwd

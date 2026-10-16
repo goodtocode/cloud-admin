@@ -11,7 +11,7 @@ param (
 	[Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
  	[string]$Path = $(throw '-Path is a required parameter.'),
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
-    [string]$Password = $(throw '-Password is a required parameter.'),
+    [SecureString]$Password,
     [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)]
 	[string]$Dns = $(throw '-Dns is a required parameter.'),
 	[string]$CertStoreLocation = 'cert:\LocalMachine\My'
@@ -43,5 +43,5 @@ $thumbprint=$Certificate.Thumbprint
 Write-host "Created certificate with thumbprint $thumbprint"
 
 ## Export
-$securePw = ConvertTo-SecureString -String $Password -Force –AsPlainText
+$securePw = $Password
 Export-PfxCertificate -Cert "$CertStoreLocation\$thumbprint" -FilePath $Path -Password $securePw
