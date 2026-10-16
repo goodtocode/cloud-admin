@@ -19,8 +19,14 @@ param (
 	[string]$CertStoreLocation = 'Cert:\LocalMachine\My',
     [int]$ExpirationMonths = 24,
     [int]$KeyLength = 2048,
-    [SecureString]$Password = (ConvertTo-SecureString -String (New-Guid).ToString() -Force -AsPlainText)
+    [SecureString]$Password
 )
+
+if (-not $Password) {
+    # Random throwaway password generated without plain-text conversion
+    $Password = New-Object System.Security.SecureString
+    [char[]](New-Guid).ToString() | ForEach-Object { $Password.AppendChar($_) }
+}
 
 ####################################################################################
 Set-ExecutionPolicy Unrestricted -Scope Process -Force
