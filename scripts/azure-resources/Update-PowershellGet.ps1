@@ -27,7 +27,7 @@ Write-Host "*****************************"
 Write-Host "*** Starting: $ThisScript on $Now"
 Write-Host "*****************************"
 # Imports
-Import-Module "./System.psm1"
+Import-Module "../System.psm1"
 
 # ***
 # *** Execute
